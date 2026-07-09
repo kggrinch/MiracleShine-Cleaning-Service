@@ -23,6 +23,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/mapped-types": "^2.1.1",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^7.8.0",
     "reflect-metadata": "^0.2.2",
@@ -60,15 +61,17 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": ".",
+    "testMatch": [
+      "**/test/unit/**/*.spec.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "coverage",
     "testEnvironment": "node"
   }
 }
