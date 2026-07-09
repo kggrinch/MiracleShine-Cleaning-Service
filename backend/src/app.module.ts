@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { CustomerModule } from './modules/customer/customer.module';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { CustomerModule } from './modules/customer/customer.module.js';
 
 @Module({
   imports: [CustomerModule],
