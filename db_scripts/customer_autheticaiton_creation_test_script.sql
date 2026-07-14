@@ -1,12 +1,13 @@
- -- Drop tables (uncomment if needed)
+-- Drop tables (uncomment if needed)
 -- DROP TABLE authentication;
 -- DROP TABLE customer;
 
--- 3. Create Customer Table
+
+-- 1. Create Customer Table
 -- Purpose: Holds Customer Data.
 CREATE TABLE IF NOT EXISTS customer
 (
-	user_id BIGINT GENERATED ALWAYS AS IDENTITY,
+    user_id INTEGER GENERATED ALWAYS AS IDENTITY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -17,24 +18,28 @@ CREATE TABLE IF NOT EXISTS customer
     CONSTRAINT chk_name_length CHECK (LENGTH(first_name) >= 2 AND LENGTH(last_name) >= 2)
 );
 
--- 3. Create Authetication Table
+
+-- 2. Create Authentication Table
 -- Purpose: Holds Customer login information.
 CREATE TABLE IF NOT EXISTS authentication
 (
-	authentication_id BIGINT GENERATED ALWAYS AS IDENTITY,
-	user_id BIGINT NOT NULL UNIQUE,
+    authentication_id INTEGER GENERATED ALWAYS AS IDENTITY,
+    user_id INTEGER NOT NULL UNIQUE,
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     PRIMARY KEY (authentication_id),
-	CONSTRAINT fk_authetication
-		FOREIGN KEY (user_id) REFERENCES customer(user_id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
+    CONSTRAINT fk_authentication
+        FOREIGN KEY (user_id) REFERENCES customer(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
+
 -- 3. Sample Data for Customer
--- Purpose: Store data about customer
-INSERT INTO customer (first_name, last_name, email, phone, passport_number) VALUES
+-- Purpose: Store customer information.
+INSERT INTO customer 
+(first_name, last_name, email, phone, passport_number) 
+VALUES
 ('Alice', 'Smith', 'alice.smith@example.com', '111-222-3333', 'PS123456'),
 ('Bob', 'Johnson', 'bob.j@example.com', '444-555-6666', 'PS789012'),
 ('Charlie', 'Brown', 'cbrownie@example.com','777-888-9999', 'PS345678'),
@@ -52,9 +57,12 @@ INSERT INTO customer (first_name, last_name, email, phone, passport_number) VALU
 ('Olivia', 'Lewis', 'olivia.l@example.com', '555-777-9999', 'PS111222'),
 ('Sophia', 'Hall', 'sophia.h@example.com', '666-888-0000', 'PS333444');
 
--- 3. Sample Data for Customer
--- Purpose: Store data about customer
-INSERT INTO authentication (user_id, username, password) VALUES
+
+-- 4. Sample Data for Authentication
+-- Purpose: Store customer login credentials.
+INSERT INTO authentication 
+(user_id, username, password) 
+VALUES
 ((SELECT user_id FROM customer WHERE email='alice.smith@example.com'), 'asmith', 'pass123'),
 ((SELECT user_id FROM customer WHERE email='bob.j@example.com'), 'bjohnson', 'securepwd'),
 ((SELECT user_id FROM customer WHERE email='cbrownie@example.com'), 'cbrown', 'mysecret'),

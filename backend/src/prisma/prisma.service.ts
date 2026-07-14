@@ -12,6 +12,8 @@ export class PrismaService
       connectionString: process.env.DATABASE_URL!,
     });
 
+    console.log("DATABASE_URL:", process.env.DATABASE_URL)
+
     super({
       adapter,
     });
