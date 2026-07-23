@@ -19,12 +19,15 @@ FROM node:22-alpine AS runtime
 
 WORKDIR /app
 
-ENV NODE_ENV=production \
-    PORT=3000
 
 COPY package*.json ./
-RUN npm install --omit=dev
 
+# had --omit=dev which removes dev dependencies for deployment purposes. No need for this since we stay in development phase or now.
+RUN npm install 
+
+ENV NODE_ENV=production \
+    PORT=3000
+    
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/prisma ./prisma
