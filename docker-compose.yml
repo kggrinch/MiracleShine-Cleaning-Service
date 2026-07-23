@@ -30,7 +30,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       PORT: ${BACKEND_PORT:-3000}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
-    command: sh -c "npx prisma migrate deploy && npm run start:prod"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm run start:prod"
     ports:
       - "${BACKEND_PORT:-3000}:3000"
 

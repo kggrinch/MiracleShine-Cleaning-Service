@@ -27,7 +27,7 @@ RUN npm install
 
 ENV NODE_ENV=production \
     PORT=3000
-    
+
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/prisma ./prisma
@@ -35,7 +35,8 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+# cmd overwritten by docker-compose.yml command, but kept here for security
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/src/main.js"]
 
 
 

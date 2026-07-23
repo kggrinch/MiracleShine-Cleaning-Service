@@ -21,7 +21,7 @@ model customer {
   first_name      String          @db.VarChar(255)
   last_name       String          @db.VarChar(255)
   email           String          @unique @db.VarChar(255)
-  phone           String          @default("N/A") @db.VarChar(20)
+  phone           String?          @default("N/A") @db.VarChar(20)
   passport_number String?         @unique @db.VarChar(20)
   authentication  authentication?
 }
