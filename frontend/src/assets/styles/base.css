@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 * {
   box-sizing: border-box;
 }
@@ -36,4 +38,16 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+
+@theme {
+    --color-primary: #36B4E5;
+    --color-primary-dark: #0B7FB3;
+
+    --color-accent: #F7E733;
+
+    --color-background: #F8FCFE;
+
+    --color-text: #1F2937;
 }
