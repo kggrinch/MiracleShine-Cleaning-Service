@@ -2,7 +2,7 @@
 
 import { Phone, Mail } from 'lucide-vue-next'
 import { Icon } from '@iconify/vue'
-import logo from '@/assets/images/main_logo.png'
+import logo from '@/assets/images/m_logo.png'
 
 const company = {
     name: "MiracleShine Cleaning",
@@ -103,7 +103,6 @@ const links = [
 
                 </a>
 
-
             </div>
 
         </div>
@@ -112,28 +111,28 @@ const links = [
 
 
 
-    <!-- ================= Main Navigation ================= -->
+    <!-- ================= Main Navigation =================  -->
 
-    <nav class="border-b bg-white shadow-sm">
+    <nav class="border-b bg-white shadow-sm border-4 border-red-500">
 
         <div
-            class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            class="mx-auto flex w-full items-center justify-between px-6 py-8 border-4 border-red-500">
 
 
             <!-- COMPANY LOGO -->
 
             <RouterLink
                 to="/"
-                class="flex items-center gap-4">
+                class="flex items-center gap-4 border-4 border-red-500">
 
 
                 <div
-                    class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white">
-
+                    class="flex h-25 w-75 items-center justify-center rounded-2xl overflow-hidden border-4 border-red-500">
+    
                     <img 
                         :src="logo" 
                         alt="Company Logo"
-                        class="h-full w-full object-cover"
+                        class="h-full w-full object-fill"
                     />
 
                 </div>
@@ -143,7 +142,7 @@ const links = [
 
                     <h1 class="text-2xl font-bold text-primary-dark">
 
-                        MiracleShine
+                        MiracleShine Cleaning Service
 
                     </h1>
 
@@ -175,8 +174,7 @@ const links = [
                     {{ link.name }}
 
                 </RouterLink>
-
-
+                
             </div>
 
 
