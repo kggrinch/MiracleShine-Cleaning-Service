@@ -33,30 +33,32 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="rounded-3xl border border-slate-200 bg-slate-950 p-6 text-white shadow-2xl shadow-slate-900/10">
-    <div class="mb-4 flex items-center justify-between">
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">Backend preview</p>
-        <h3 class="text-xl font-semibold">Customer directory</h3>
+  <div class="card bg-dark text-white border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <p class="text-uppercase small text-info mb-1">Backend preview</p>
+          <h3 class="h5 fw-semibold">Customer directory</h3>
+        </div>
+        <span v-if="loading" class="badge bg-secondary text-white">Loading…</span>
       </div>
-      <span v-if="loading" class="rounded-full bg-white/10 px-3 py-1 text-sm text-slate-300">Loading…</span>
+
+      <label class="form-label text-white-50" for="customer-select">Select a customer</label>
+      <select
+        id="customer-select"
+        v-model="selected"
+        class="form-select bg-dark text-white border-secondary"
+      >
+        <option value="" disabled>Choose a customer</option>
+        <option v-for="customer in customers" :key="customer.user_id" :value="String(customer.user_id)">
+          {{ customer.first_name }} {{ customer.last_name }} — {{ customer.email }}
+        </option>
+      </select>
+
+      <p v-if="error" class="mt-4 text-warning small">{{ error }}</p>
+      <p v-else-if="selected" class="mt-4 small text-white-50">
+        Selected customer ID: <span class="fw-semibold text-white">{{ selected }}</span>
+      </p>
     </div>
-
-    <label class="mb-2 block text-sm font-medium text-slate-300" for="customer-select">Select a customer</label>
-    <select
-      id="customer-select"
-      v-model="selected"
-      class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none ring-0"
-    >
-      <option value="" disabled>Choose a customer</option>
-      <option v-for="customer in customers" :key="customer.user_id" :value="String(customer.user_id)">
-        {{ customer.first_name }} {{ customer.last_name }} — {{ customer.email }}
-      </option>
-    </select>
-
-    <p v-if="error" class="mt-4 text-sm text-amber-300">{{ error }}</p>
-    <p v-else-if="selected" class="mt-4 text-sm text-slate-300">
-      Selected customer ID: <span class="font-semibold text-white">{{ selected }}</span>
-    </p>
   </div>
 </template>

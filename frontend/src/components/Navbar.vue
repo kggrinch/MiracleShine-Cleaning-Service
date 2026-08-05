@@ -10,31 +10,31 @@ const links = [
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-      <RouterLink to="/" class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-700 text-lg font-bold text-white shadow-lg shadow-cyan-500/20">
+  <header class="sticky-top border-bottom bg-body bg-opacity-75" style="backdrop-filter: blur(16px);">
+    <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between px-4 py-3">
+      <RouterLink to="/" class="d-flex align-items-center gap-3 text-decoration-none">
+        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold" style="width:44px; height:44px;">
           M
         </div>
         <div>
-          <p class="text-sm font-semibold tracking-[0.2em] text-cyan-600 uppercase">MiracleShine</p>
-          <p class="text-base font-semibold text-slate-900">Cleaning Service</p>
+          <p class="text-uppercase small mb-0 text-primary">MiracleShine</p>
+          <p class="mb-0 fw-semibold text-dark">Cleaning Service</p>
         </div>
       </RouterLink>
 
-      <nav class="hidden items-center gap-6 md:flex">
+      <nav class="d-none d-md-flex align-items-center gap-4">
         <RouterLink
           v-for="link in links"
           :key="link.path"
           :to="link.path"
-          class="text-sm font-medium text-slate-600 transition hover:text-cyan-600"
-          active-class="text-cyan-600"
+          class="nav-link text-muted px-2"
+          active-class="active"
         >
           {{ link.name }}
         </RouterLink>
       </nav>
 
-      <a href="#contact" class="hidden rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 md:inline-flex">
+      <a href="#contact" class="btn btn-primary d-none d-md-inline-flex">
         Get a Quote
       </a>
     </div>

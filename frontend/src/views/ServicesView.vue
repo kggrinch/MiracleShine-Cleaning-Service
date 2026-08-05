@@ -20,20 +20,30 @@ const services = [
 </script>
 
 <template>
-  <section class="space-y-8">
-    <div class="rounded-[2rem] border border-slate-200 bg-white/80 p-8 shadow-xl shadow-slate-200/70 backdrop-blur">
-      <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-600">Our services</p>
-      <h1 class="mt-3 text-4xl font-semibold text-slate-900 sm:text-5xl">Custom cleaning plans for every kind of property</h1>
-      <p class="mt-4 max-w-3xl text-lg text-slate-600">
-        From daily office refreshes to large-scale property care, we tailor each visit around your schedule and standards.
-      </p>
+  <section class="row g-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <p class="text-primary text-uppercase small mb-2">Our services</p>
+          <h1 class="h2 fw-semibold">Custom cleaning plans for every kind of property</h1>
+          <p class="lead text-secondary mt-3">
+            From daily office refreshes to large-scale property care, we tailor each visit around your schedule and standards.
+          </p>
+        </div>
+      </div>
     </div>
 
-    <div class="grid gap-6 md:grid-cols-2">
-      <article v-for="service in services" :key="service.title" class="rounded-[1.75rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/70 transition hover:-translate-y-1 hover:shadow-xl">
-        <h2 class="text-2xl font-semibold text-slate-900">{{ service.title }}</h2>
-        <p class="mt-3 text-slate-600">{{ service.body }}</p>
-      </article>
+    <div class="col-12">
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        <div v-for="service in services" :key="service.title" class="col">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h2 class="h5 fw-semibold text-dark">{{ service.title }}</h2>
+              <p class="text-secondary mt-3">{{ service.body }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>

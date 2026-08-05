@@ -4,11 +4,11 @@ import Footer from '@/components/layout/Footer.vue'
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-background">
+  <div class="min-vh-100 d-flex flex-column bg-light">
 
     <Navbar />
 
-    <main class="flex-1">
+    <main class="flex-fill">
       <router-view />
     </main>
 

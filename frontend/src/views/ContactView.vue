@@ -3,25 +3,30 @@ import CustomerDropdown from '@/components/CustomerDropdown.vue'
 </script>
 
 <template>
-  <section class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-    <div class="rounded-[2rem] border border-slate-200 bg-white/80 p-8 shadow-xl shadow-slate-200/70 backdrop-blur">
-      <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-600">Contact us</p>
-      <h1 class="mt-3 text-4xl font-semibold text-slate-900 sm:text-5xl">Let’s make your space shine</h1>
-      <p class="mt-4 text-lg text-slate-600">
-        Reach out for a free estimate, service consultation, or a customized cleaning plan for your business.
-      </p>
-      <div class="mt-8 space-y-4 text-slate-700">
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p class="font-semibold">Phone</p>
-          <a href="tel:5550148" class="text-cyan-600">(555) 0148</a>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p class="font-semibold">Email</p>
-          <a href="mailto:hello@miracleshine.com" class="text-cyan-600">hello@miracleshine.com</a>
+  <section class="row g-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <p class="text-primary text-uppercase small mb-2">Our services</p>
+          <h1 class="h2 fw-semibold">Custom cleaning plans for every kind of property</h1>
+          <p class="lead text-secondary mt-3">
+            From daily office refreshes to large-scale property care, we tailor each visit around your schedule and standards.
+          </p>
         </div>
       </div>
     </div>
 
-    <CustomerDropdown />
+    <div class="col-12">
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        <div v-for="service in services" :key="service.title" class="col">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h2 class="h5 fw-semibold text-dark">{{ service.title }}</h2>
+              <p class="text-secondary mt-3">{{ service.body }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
