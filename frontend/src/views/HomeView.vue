@@ -1,21 +1,17 @@
 <script setup lang="ts">
-import HeroSection from '@/components/home/HeroSection.vue'
-import ServicesPreview from '@/components/home/ServicesPreviewSection.vue'
-import WhyChooseUs from '@/components/home/WhyChooseUsSection.vue'
-import TestimonialsSection from '@/components/home/ReviewSection.vue'
-import CTASection from '@/components/home/CallToActionSection.vue'
+import Hero from '@/components/sections/Hero.vue'
+import Services from '@/components/sections/Services.vue'
+import WhyChooseUs from '@/components/sections/WhyChooseUs.vue'
+import About from '@/components/sections/About.vue'
+import Reviews from '@/components/sections/Reviews.vue'
+import QuoteForm from '@/components/sections/QuoteForm.vue'
 </script>
 
 <template>
-
-  <HeroSection />
-
-  <ServicesPreview />
-
+  <Hero />
+  <Services />
   <WhyChooseUs />
-
-  <TestimonialsSection />
-
-  <CTASection />
-
+  <About />
+  <Reviews />
+  <QuoteForm />
 </template>

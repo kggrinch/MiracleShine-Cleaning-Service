@@ -3,7 +3,6 @@ import HomeView from '../views/HomeView.vue'
 import AboutView from '../views/AboutView.vue'
 import ServicesView from '../views/ServicesView.vue'
 import ContactView from '../views/ContactView.vue'
-import path from 'path/win32'
 import ReviewsView from '../views/ReviewsView.vue'
 import QuoteView from '../views/QuoteView.vue'
 
