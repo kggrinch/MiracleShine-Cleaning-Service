@@ -63,7 +63,7 @@ const services = [
         <h3 class="mt-5 text-xl font-semibold text-slate-900">{{ service.title }}</h3>
         <p class="mt-3 text-[0.95rem] leading-7 text-slate-600">{{ service.description }}</p>
 
-        <RouterLink to="/get-quote" class="mt-6 inline-flex items-center gap-2 font-semibold text-primary transition hover:text-primary-dark">
+        <RouterLink to="/contact" class="mt-6 inline-flex items-center gap-2 font-semibold text-primary transition hover:text-primary-dark">
           Learn More
           <ArrowRight class="h-4 w-4" />
         </RouterLink>

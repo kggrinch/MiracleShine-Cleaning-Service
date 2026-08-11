@@ -43,7 +43,7 @@ const mobileMenuOpen = ref(false)
           <Phone class="h-4 w-4" />
           (425) 555-1234
         </a>
-        <RouterLink to="/get-quote" class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-primary-dark">
+        <RouterLink to="/contact" class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-primary-dark">
           <Sparkles class="h-4 w-4" />
           Get a Quote
         </RouterLink>
@@ -60,7 +60,7 @@ const mobileMenuOpen = ref(false)
         <RouterLink v-for="link in links" :key="link.name" :to="link.to" class="rounded-2xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary" @click="mobileMenuOpen = false">
           {{ link.name }}
         </RouterLink>
-        <RouterLink to="/get-quote" class="mt-2 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white" @click="mobileMenuOpen = false">
+        <RouterLink to="/contact" class="mt-2 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white" @click="mobileMenuOpen = false">
           Get a Quote
         </RouterLink>
       </div>

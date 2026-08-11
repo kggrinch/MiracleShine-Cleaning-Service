@@ -11,19 +11,19 @@ type Review = {
 // Social proof cards to reinforce trust and perceived quality.
 const reviews: Review[] = [
   {
-    name: 'Maria T.',
-    title: 'Homeowner',
-    quote: 'The team was punctual, thoughtful, and left every room sparkling. It feels like a fresh start every time.',
+    name: 'Facility Manager',
+    title: 'Commercial Property',
+    quote: 'The team is reliable, thorough, and keeps our office looking polished every week.',
   },
   {
-    name: 'Jason & Lauren',
-    title: 'Property Managers',
-    quote: 'Their attention to detail and communication makes them our go-to cleaning partner for every turnover.',
+    name: 'Building Director',
+    title: 'Multi-tenant Office',
+    quote: 'Their approach is professional, efficient, and respectful of our schedule and tenants.',
   },
   {
-    name: 'Diana P.',
-    title: 'Office Manager',
-    quote: 'Professional, reliable, and polished. Our office always feels welcoming after each visit.',
+    name: 'Operations Lead',
+    title: 'Retail Facility',
+    quote: 'They deliver consistent results with a strong attention to detail in shared spaces and restrooms.',
   },
 ]
 

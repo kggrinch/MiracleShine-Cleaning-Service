@@ -3,7 +3,7 @@ import { Mail, Phone, Send } from 'lucide-vue-next'
 </script>
 
 <template>
-  <section id="quote" class="mx-auto max-w-7xl px-6 py-24 sm:py-28 lg:px-8">
+  <section id="contact" class="scroll-mt-24 mx-auto max-w-7xl px-6 py-24 sm:py-28 lg:px-8">
     <div class="grid gap-8 rounded-[2.5rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-[0_24px_80px_-28px_rgba(2,8,23,0.65)] lg:grid-cols-[0.9fr_1.1fr] lg:p-12">
       <div class="flex flex-col justify-center">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-300">Free quote</p>
@@ -26,47 +26,48 @@ import { Mail, Phone, Send } from 'lucide-vue-next'
         </div>
       </div>
 
-      <form class="rounded-[2rem] bg-white p-6 text-slate-900 shadow-xl shadow-black/10 sm:p-8">
+      <form class="rounded-[2rem] bg-white p-6 text-slate-900 shadow-xl shadow-black/10 sm:p-8" @submit.prevent>
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm font-medium text-slate-700">
             First Name
-            <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="Jordan" />
+            <input required name="firstName" type="text" autocomplete="given-name" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="Jordan" />
           </label>
           <label class="block text-sm font-medium text-slate-700">
             Last Name
-            <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="Lee" />
+            <input required name="lastName" type="text" autocomplete="family-name" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="Lee" />
           </label>
           <label class="block text-sm font-medium text-slate-700">
             Phone
-            <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="(555) 123-4567" />
+            <input required name="phone" type="tel" autocomplete="tel" inputmode="tel" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="(555) 123-4567" />
           </label>
           <label class="block text-sm font-medium text-slate-700">
             Email
-            <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="you@example.com" />
+            <input required name="email" type="email" autocomplete="email" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="you@example.com" />
           </label>
         </div>
 
         <label class="mt-4 block text-sm font-medium text-slate-700">
           Address
-          <input class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="123 Main Street" />
+          <input required name="address" type="text" autocomplete="street-address" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="123 Main Street" />
         </label>
 
         <label class="mt-4 block text-sm font-medium text-slate-700">
           Cleaning Type
-          <select class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary">
-            <option>Residential Cleaning</option>
+          <select required name="serviceType" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary">
+            <option value="" disabled selected hidden>Select a service</option>
             <option>Commercial Cleaning</option>
             <option>Deep Cleaning</option>
             <option>Move In / Move Out</option>
+            <option>Recurring Janitorial</option>
           </select>
         </label>
 
         <label class="mt-4 block text-sm font-medium text-slate-700">
           Message
-          <textarea class="mt-2 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="Tell us about your space and scheduling needs." />
+          <textarea required name="message" class="mt-2 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary" placeholder="Tell us about your space and scheduling needs."></textarea>
         </label>
 
-        <button class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 font-semibold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-primary-dark">
+        <button type="submit" class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 font-semibold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-primary-dark">
           Request Quote
           <Send class="h-4 w-4" />
         </button>
