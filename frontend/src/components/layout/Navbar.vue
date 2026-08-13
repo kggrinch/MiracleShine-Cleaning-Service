@@ -27,12 +27,13 @@ const mobileMenuOpen = ref(false)
         </div>
       </RouterLink>
 
-      <nav class="hidden items-center gap-8 lg:flex">
+      <nav class="hidden items-center gap-8 lg:flex" aria-label="Primary">
         <RouterLink
           v-for="link in links"
           :key="link.name"
           :to="link.to"
           class="text-sm font-medium text-slate-700 transition duration-200 hover:text-primary"
+          active-class="text-primary"
         >
           {{ link.name }}
         </RouterLink>
@@ -49,15 +50,15 @@ const mobileMenuOpen = ref(false)
         </RouterLink>
       </div>
 
-      <button class="rounded-full border border-slate-200 p-2 text-slate-700 lg:hidden" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle menu">
+      <button class="rounded-full border border-slate-200 p-2 text-slate-700 lg:hidden" :aria-expanded="mobileMenuOpen" aria-controls="mobile-menu" aria-label="Toggle menu" @click="mobileMenuOpen = !mobileMenuOpen">
         <Menu v-if="!mobileMenuOpen" class="h-5 w-5" />
         <X v-else class="h-5 w-5" />
       </button>
     </div>
 
-    <div v-if="mobileMenuOpen" class="border-t border-slate-200 bg-white px-6 py-4 lg:hidden">
+    <div v-if="mobileMenuOpen" id="mobile-menu" class="border-t border-slate-200 bg-white px-6 py-4 lg:hidden">
       <div class="flex flex-col gap-2">
-        <RouterLink v-for="link in links" :key="link.name" :to="link.to" class="rounded-2xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary" @click="mobileMenuOpen = false">
+        <RouterLink v-for="link in links" :key="link.name" :to="link.to" class="rounded-2xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary" active-class="text-primary font-semibold" @click="mobileMenuOpen = false">
           {{ link.name }}
         </RouterLink>
         <RouterLink to="/get-quote" class="mt-2 rounded-full bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white" @click="mobileMenuOpen = false">

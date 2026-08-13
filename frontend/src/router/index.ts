@@ -5,6 +5,7 @@ import ServicesView from '../views/ServicesView.vue'
 import ContactView from '../views/ContactView.vue'
 import ReviewsView from '../views/ReviewsView.vue'
 import QuoteView from '../views/QuoteView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,6 +49,11 @@ const router = createRouter({
       path: '/get-quote',
       name: 'get-quote',
       component: QuoteView,
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFoundView,
     },
   ],
 })

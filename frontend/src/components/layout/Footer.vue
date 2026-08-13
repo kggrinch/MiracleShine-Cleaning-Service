@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Clock3, Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-vue-next'
+import { Clock3, Mail, MapPin, Phone } from 'lucide-vue-next'
 </script>
 
 <template>
@@ -46,11 +46,6 @@ import { Clock3, Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-vue-nex
           <li class="flex items-center gap-2"><Clock3 class="h-4 w-4 text-primary" /> Mon–Fri: 8:00 AM – 6:00 PM</li>
           <li class="flex items-center gap-2"><Clock3 class="h-4 w-4 text-primary" /> Weekend: By appointment</li>
         </ul>
-
-        <div class="mt-5 flex gap-3">
-          <a href="#" class="rounded-full border border-slate-200 p-2 text-slate-600 transition hover:border-primary hover:text-primary"><Facebook class="h-4 w-4" /></a>
-          <a href="#" class="rounded-full border border-slate-200 p-2 text-slate-600 transition hover:border-primary hover:text-primary"><Instagram class="h-4 w-4" /></a>
-        </div>
       </div>
     </div>
   </footer>

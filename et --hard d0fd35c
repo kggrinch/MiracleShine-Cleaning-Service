@@ -1,0 +1,41 @@
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33md0fd35c[m[33m ([m[1;31morigin/tailwind_switch[m[33m)[m HEAD@{1}: checkout: moving from tailwind_switch_version2_imgn to tailwind_switch
+[33m79b27f1[m[33m ([m[1;31morigin/tailwind_switch_version2_imgn[m[33m, [m[1;32mtailwind_switch_version2_imgn[m[33m)[m HEAD@{2}: commit: landing page image not working but components filled
+[33md0fd35c[m[33m ([m[1;31morigin/tailwind_switch[m[33m)[m HEAD@{3}: checkout: moving from tailwind_switch to tailwind_switch_version2_imgn
+[33md0fd35c[m[33m ([m[1;31morigin/tailwind_switch[m[33m)[m HEAD@{4}: commit: finished landing page using tailwind
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{5}: checkout: moving from main to tailwind_switch
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{6}: checkout: moving from main to main
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{7}: checkout: moving from bootstrap_switch to main
+[33m6248c94[m[33m ([m[1;31morigin/bootstrap_switch[m[33m, [m[1;32mbootstrap_switch[m[33m)[m HEAD@{8}: checkout: moving from main to bootstrap_switch
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{9}: checkout: moving from main to main
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{10}: checkout: moving from main to main
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{11}: checkout: moving from bootstrap_switch to main
+[33m6248c94[m[33m ([m[1;31morigin/bootstrap_switch[m[33m, [m[1;32mbootstrap_switch[m[33m)[m HEAD@{12}: commit: migrate to boostrap styling from tailwind
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{13}: checkout: moving from main to bootstrap_switch
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{14}: checkout: moving from main to main
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{15}: checkout: moving from bootstrap_switch to main
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{16}: checkout: moving from main to bootstrap_switch
+[33m7ece617[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtailwind_switch[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m HEAD@{17}: commit: working on navbar
+[33m3ab54c3[m HEAD@{18}: commit: inital frontend design started with navbar and main folder structure. Need to fill in files.
+[33m409ba94[m HEAD@{19}: commit: Setup demo frontend UI design with api getcustomers test
+[33m3f40705[m HEAD@{20}: commit: containerized frontend with docker compose
+[33m5eccdaf[m HEAD@{21}: commit: added cmd to seed db on compose up
+[33mb0cde11[m HEAD@{22}: commit: containerized backend and db setup
+[33m0076838[m HEAD@{23}: commit: added tsx seed
+[33m02b3052[m HEAD@{24}: commit: containerized backend and database. Added dockerfile into backend and docker compose into application. (still need containerization of frontend)
+[33mccbc381[m HEAD@{25}: commit: added prisma migration with seed file for data insertion
+[33m9eea74d[m HEAD@{26}: commit: added middleware (cors, helmet, compression, globalpipes)
+[33mced7fea[m HEAD@{27}: commit: added adapter nest.js env file reading and fixed finalized api communication between db and backend
+[33m9b826ba[m HEAD@{28}: reset: moving to origin/main
+[33m9b826ba[m HEAD@{29}: commit: modified project structure setup working prisma adapter
+[33mec283e9[m HEAD@{30}: commit: 1. setup database with prisma. 2. Setup folder structure of feature apis and testing suites 3. setup customer api for demo purposes
+[33m818a636[m HEAD@{31}: commit: setting up db connection to backend using prisma TODO
+[33m0b2869d[m[33m ([m[1;32magents/chat-functionality-explanation[m[33m)[m HEAD@{32}: commit: demo db script to create and fill customer and authetication
+[33m3310d37[m HEAD@{33}: commit: set up foundations for backend primsa communication
+[33m88b8c82[m HEAD@{34}: commit: added axios for nestjs backend communication and depedencies
+[33m786918f[m HEAD@{35}: commit: vue initialized frontend
+[33m12eea2d[m HEAD@{36}: commit: initailized nestjs backend
+[33mdcde131[m HEAD@{37}: commit: modified gitignore
+[33m2810474[m HEAD@{38}: commit: changed gitignore file
+[33m7c2ecea[m HEAD@{39}: pull origin main: Fast-forward
+[33m6c10a81[m HEAD@{40}: commit (initial): adding gitignore file
