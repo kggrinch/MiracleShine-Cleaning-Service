@@ -6,24 +6,24 @@ import { ArrowRight, BadgeCheck, Clock3, ShieldCheck, Star } from 'lucide-vue-ne
   <section class="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(54,180,229,0.2),_transparent_32%),linear-gradient(135deg,_#f8fcfe_0%,_#eef6ff_45%,_#fdfefe_100%)]">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_rgba(247,231,51,0.16),_transparent_30%)]" />
 
-    <div class="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:px-8 lg:py-28">
+    <div class="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:px-8 lg:py-24">
       <div class="rounded-[2.5rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_30px_90px_-35px_rgba(15,23,42,0.35)] backdrop-blur-xl lg:p-10 xl:p-14">
         <div class="grid gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
           <div class="flex flex-col justify-center">
-            <div class="inline-flex w-fit items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700">
+            <div class="hero-fade hero-fade-1 inline-flex w-fit items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700">
               <BadgeCheck class="h-4 w-4" />
               Trusted residential & commercial cleaning specialists
             </div>
 
-            <h1 class="mt-6 text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            <h1 class="hero-fade hero-fade-2 mt-6 text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
               Premium cleaning services that make every space feel effortless.
             </h1>
 
-            <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
+            <p class="hero-fade hero-fade-3 mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
               Miracle Shine Cleaning Service brings polished detail, dependable scheduling, and a refined finish to homes, offices, and properties that deserve the very best.
             </p>
 
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div class="hero-fade hero-fade-4 mt-8 flex flex-col gap-3 sm:flex-row">
               <RouterLink to="/get-quote" class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 font-semibold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-primary-dark">
                 Request a Quote
                 <ArrowRight class="h-4 w-4" />
@@ -34,7 +34,7 @@ import { ArrowRight, BadgeCheck, Clock3, ShieldCheck, Star } from 'lucide-vue-ne
               </RouterLink>
             </div>
 
-            <div class="mt-10 grid gap-4 sm:grid-cols-3">
+            <div class="hero-fade hero-fade-5 mt-10 grid gap-4 sm:grid-cols-3">
               <div class="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
                 <div class="flex items-center gap-2 text-slate-900">
                   <ShieldCheck class="h-4 w-4 text-primary" />
@@ -58,11 +58,11 @@ import { ArrowRight, BadgeCheck, Clock3, ShieldCheck, Star } from 'lucide-vue-ne
 
           <div class="relative">
             <div class="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary/20 via-transparent to-accent/25 blur-3xl" />
-            <div class="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-3 shadow-2xl shadow-slate-300/70">
-              <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=80" alt="Professional cleaning team preparing a polished home interior" class="h-[420px] w-full rounded-[1.5rem] object-cover sm:h-[520px]" />
+            <div class="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-3 shadow-2xl shadow-slate-300/70">
+              <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=80" alt="Professional cleaning team preparing a polished home interior" class="hero-image h-[420px] w-full rounded-[1.5rem] object-cover sm:h-[520px]" />
             </div>
 
-            <div class="absolute bottom-4 left-4 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lg backdrop-blur">
+            <div class="hero-float absolute bottom-4 left-4 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lg backdrop-blur">
               <div class="flex items-center gap-1 text-accent">
                 <Star v-for="n in 5" :key="n" class="h-4 w-4 fill-current" />
               </div>
@@ -75,3 +75,69 @@ import { ArrowRight, BadgeCheck, Clock3, ShieldCheck, Star } from 'lucide-vue-ne
     </div>
   </section>
 </template>
+
+<style scoped>
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-fade {
+  opacity: 0;
+  animation: hero-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hero-fade-1 {
+  animation-delay: 0.1s;
+}
+.hero-fade-2 {
+  animation-delay: 0.18s;
+}
+.hero-fade-3 {
+  animation-delay: 0.26s;
+}
+.hero-fade-4 {
+  animation-delay: 0.34s;
+}
+.hero-fade-5 {
+  animation-delay: 0.42s;
+}
+
+.hero-image {
+  transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:hover .hero-image {
+  transform: scale(1.045);
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.hero-float {
+  animation: hero-float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade {
+    opacity: 1;
+    animation: none;
+  }
+  .hero-float {
+    animation: none;
+  }
+  .group:hover .hero-image {
+    transform: none;
+  }
+}
+</style>
