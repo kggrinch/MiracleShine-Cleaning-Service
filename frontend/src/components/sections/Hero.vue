@@ -6,7 +6,7 @@ import AppButton from '@/components/ui/AppButton.vue'
 <template>
   <!-- Full-bleed professional cleaning photo as the hero canvas. A left-to-right
        dark gradient keeps the headline readable without masking the image. -->
-  <section class="relative isolate overflow-hidden bg-[url('/images/hero-commercial-cleaning.jpg')] bg-cover bg-[position:58%_center] bg-no-repeat">
+  <section class="relative isolate overflow-hidden bg-[url('/images/hero-modern-office.jpg')] bg-cover bg-[position:58%_center] bg-no-repeat">
     <div
       class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent"
       aria-hidden="true"

@@ -39,13 +39,11 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
   <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
       <RouterLink to="/" class="group flex items-center gap-3" aria-label="Miracle Shine Cleaning Service - Home">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-lg font-semibold text-primary shadow-sm transition-transform duration-300 group-hover:scale-105">
-          MS
-        </div>
-        <div>
-          <p class="text-base font-semibold tracking-tight text-slate-900">Miracle Shine</p>
-          <p class="text-sm text-slate-500">Cleaning Service</p>
-        </div>
+        <img
+          src="/m_logo.png"
+          alt="Miracle Shine Cleaning"
+          class="h-12 w-40 rounded-xl object-cover object-[center_50%] shadow-sm transition-transform duration-300 group-hover:scale-105"
+        />
       </RouterLink>
 
             <!-- Desktop nav -->
