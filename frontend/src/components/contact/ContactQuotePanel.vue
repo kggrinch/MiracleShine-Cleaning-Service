@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CalendarCheck, Mail, MapPin, Phone } from 'lucide-vue-next'
+import BackgroundDecor from '@/components/ui/BackgroundDecor.vue'
 
 defineProps<{
   eyebrow: string
@@ -9,23 +10,26 @@ defineProps<{
 </script>
 
 <template>
-  <div class="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] sm:p-10">
-    <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+  <div v-reveal class="relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] sm:p-10">
+    <BackgroundDecor />
+    <div class="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-sky-100/70 to-accent/10 blur-2xl" aria-hidden="true" />
+
+    <div class="relative grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
       <div>
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">{{ eyebrow }}</p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">{{ title }}</h1>
         <p class="mt-5 text-lg leading-8 text-slate-600">{{ description }}</p>
 
         <div class="mt-8 space-y-4">
-          <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <Phone class="h-5 w-5 shrink-0 text-primary" />
-            <a href="tel:4255551234" class="font-medium text-slate-700 transition hover:text-primary">(425) 555-1234</a>
+          <div class="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-white hover:shadow-[0_14px_34px_-22px_rgba(54,180,229,0.7)]">
+            <Phone class="h-5 w-5 shrink-0 text-primary transition-transform duration-300 group-hover:scale-110" />
+            <a href="tel:4255551234" class="font-medium text-slate-700 transition hover:text-primary-dark">(425) 555-1234</a>
           </div>
-          <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-white hover:shadow-[0_16px_34px_-22px_rgba(54,180,229,0.7)]">
             <Mail class="h-5 w-5 shrink-0 text-primary" />
-            <a href="mailto:info@miracleshinecleaning.com" class="font-medium text-slate-700 transition hover:text-primary">info@miracleshinecleaning.com</a>
+            <a href="mailto:info@miracleshinecleaning.com" class="font-medium text-slate-700 transition hover:text-primary-dark">info@miracleshinecleaning.com</a>
           </div>
-          <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:bg-white hover:shadow-[0_16px_34px_-22px_rgba(54,180,229,0.7)]">
             <MapPin class="h-5 w-5 shrink-0 text-primary" />
             <span class="font-medium text-slate-700">Serving the Seattle area with precision and care</span>
           </div>

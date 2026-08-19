@@ -3,7 +3,7 @@ import { CheckCircle2, HeartHandshake, ShieldCheck, Sparkles } from 'lucide-vue-
 </script>
 
 <template>
-  <section class="mx-auto max-w-7xl px-6 py-24 sm:py-28 lg:px-8">
+  <section class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
     <div class="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
       <div class="overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)]">
         <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1400&q=80" alt="A refined, professionally cleaned interior" class="h-full min-h-[360px] w-full object-cover" />

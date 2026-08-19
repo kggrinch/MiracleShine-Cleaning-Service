@@ -9,7 +9,7 @@ type Review = {
 }
 
 // Representative client feedback. Replace the entries below with real
-// testimonials as they become available — names are kept as first-name
+// testimonials as they become available - names are kept as first-name
 // initials to protect client privacy.
 const testimonials: Review[] = [
   {
@@ -40,7 +40,7 @@ const testimonials: Review[] = [
   {
     name: 'Derek M.',
     title: 'Restaurant Owner',
-    quote: 'Clean, respectful, and consistent — exactly what you need when your space hosts people all day.',
+    quote: 'Clean, respectful, and consistent - exactly what you need when your space hosts people all day.',
   },
 ]
 
@@ -48,7 +48,7 @@ const overallRating = 4.9
 </script>
 
 <template>
-  <section class="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
+  <section class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
     <PageBanner
       eyebrow="Reviews"
       title="Trusted by clients who value reliability and polished results."
@@ -80,7 +80,7 @@ const overallRating = 4.9
         <div class="flex items-center gap-1 text-accent">
           <Star v-for="n in 5" :key="n" class="h-4 w-4 fill-current" />
         </div>
-        <p class="mt-5 text-[0.95rem] leading-7 text-slate-600">“{{ review.quote }}”</p>
+        <p class="mt-5 text-[0.95rem] leading-7 text-slate-600">"{{ review.quote }}"</p>
         <div class="mt-6 border-t border-slate-100 pt-5">
           <p class="font-semibold text-slate-900">{{ review.name }}</p>
           <p class="text-sm text-slate-500">{{ review.title }}</p>
@@ -92,7 +92,7 @@ const overallRating = 4.9
       Representative client feedback shown as examples. Names are abbreviated to protect client privacy.
     </p>
 
-    <div class="mt-20">
+    <div class="mt-16 sm:mt-20">
       <PageBanner
         eyebrow="Your turn"
         title="Ready for a cleaner, more polished space?"

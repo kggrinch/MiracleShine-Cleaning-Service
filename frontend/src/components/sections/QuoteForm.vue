@@ -66,7 +66,7 @@ function resetForm() {
 </script>
 
 <template>
-  <section id="quote" class="mx-auto max-w-7xl px-6 py-24 sm:py-28 lg:px-8">
+  <section id="quote" class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
     <div class="grid gap-8 rounded-[2.5rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-[0_24px_80px_-28px_rgba(2,8,23,0.65)] lg:grid-cols-[0.9fr_1.1fr] lg:p-12">
       <div class="flex flex-col justify-center">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-300">Free quote</p>

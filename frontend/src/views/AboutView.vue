@@ -28,7 +28,7 @@ const values: Value[] = [
   },
   {
     title: 'Reliable standards',
-    description: 'Consistent, dependable service you can count on — visit after visit, without surprises.',
+    description: 'Consistent, dependable service you can count on - visit after visit, without surprises.',
     icon: ShieldCheck,
   },
   {
@@ -45,11 +45,11 @@ const values: Value[] = [
 </script>
 
 <template>
-  <section class="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
+  <section class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
     <PageBanner
       eyebrow="About us"
       title="A local cleaning company built on trust, consistency, and care."
-      description="Miracle Shine Cleaning Service exists to give busy families and successful businesses the gift of a space that feels genuinely refreshed — handled with respect and finished with pride."
+      description="Miracle Shine Cleaning Service exists to give busy families and successful businesses the gift of a space that feels genuinely refreshed - handled with respect and finished with pride."
     />
 
     <div class="mt-12 grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
@@ -99,7 +99,7 @@ const values: Value[] = [
       </div>
     </div>
 
-    <div class="mt-24">
+    <div class="mt-16 sm:mt-20">
       <div class="max-w-2xl">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">What we stand for</p>
         <h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -122,7 +122,7 @@ const values: Value[] = [
       </div>
     </div>
 
-    <div class="mt-24">
+    <div class="mt-16 sm:mt-20">
       <PageBanner
         eyebrow="See the difference"
         title="Experience a space that's cleaned with genuine care."

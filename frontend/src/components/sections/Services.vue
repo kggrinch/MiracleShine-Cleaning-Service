@@ -37,7 +37,7 @@ const services = [
 </script>
 
 <template>
-  <section id="services" class="mx-auto max-w-7xl px-6 py-24 sm:py-28 lg:px-8">
+  <section id="services" class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
     <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
       <div class="max-w-3xl">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">Our services</p>
@@ -49,8 +49,8 @@ const services = [
         </p>
       </div>
 
-      <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 shadow-sm">
-        Weekly • Bi-weekly • One-time • Custom plans
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 shadow-sm">
+        <span>Weekly</span><span aria-hidden="true" class="text-primary">&bull;</span><span>Bi-weekly</span><span aria-hidden="true" class="text-primary">&bull;</span><span>One-time</span><span aria-hidden="true" class="text-primary">&bull;</span><span>Custom plans</span>
       </div>
     </div>
 

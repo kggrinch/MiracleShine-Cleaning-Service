@@ -6,7 +6,8 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Router scrollBehavior owns scrolling (top on navigation, smooth on anchors). */
+  scroll-behavior: auto;
 }
 
 body {
@@ -45,4 +46,79 @@ img {
   --color-accent: #f7e733;
   --color-background: #f8fcfe;
   --color-text: #1f2937;
+}
+
+/* ---------------------------------------------------------------------------
+ * Scroll-reveal system
+ * Driven by the global `v-reveal` directive. `.reveal` is the "hidden" state;
+ * `.is-revealed` is added the first time an element enters the viewport.
+ * Variant classes let callers change the direction/starting scale.
+ * ------------------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-left {
+  transform: translateX(-32px);
+}
+.reveal-right {
+  transform: translateX(32px);
+}
+.reveal-zoom {
+  transform: scale(0.95);
+}
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Route transitions
+ * Applied in App.vue around <RouterView> - a quick fade/rise so page changes
+ * feel intentional without slowing navigation down.
+ * ------------------------------------------------------------------------- */
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion preferences
+ * Collapse every decorative/reveal animation to a single no-op state for
+ * visitors who request reduced motion.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-zoom {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
+  .page-enter-from,
+  .page-leave-to {
+    opacity: 1;
+    transform: none;
+  }
 }

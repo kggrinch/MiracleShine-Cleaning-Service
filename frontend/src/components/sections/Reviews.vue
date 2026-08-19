@@ -44,7 +44,7 @@ function prevReview() {
 </script>
 
 <template>
-  <section class="bg-slate-50 py-24 sm:py-28">
+  <section class="bg-slate-50 py-12 sm:py-16">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div class="max-w-2xl">
