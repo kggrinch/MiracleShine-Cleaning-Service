@@ -26,7 +26,7 @@ import AppButton from '@/components/ui/AppButton.vue'
         </h1>
 
         <p class="hero-fade hero-fade-3 mt-6 max-w-2xl text-lg leading-8 text-slate-200 sm:text-xl">
-          Miracle Shine delivers polished, dependable cleaning for offices, facilities, and homes - with detail-driven service and a satisfaction guarantee on every visit.
+          MiracleShine delivers polished, dependable cleaning for offices, facilities, and homes - with detail-driven service and a satisfaction guarantee on every visit.
         </p>
 
         <div class="hero-fade hero-fade-4 mt-8 flex flex-col gap-3 sm:flex-row">
