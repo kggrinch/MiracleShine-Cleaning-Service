@@ -1,22 +1,13 @@
-jest.mock('../../src/prisma/prisma.service', () => ({
-  PrismaService: class PrismaService {
-    customer = {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    };
-
-    onModuleInit = jest.fn();
-    onModuleDestroy = jest.fn();
-  },
+jest.mock('../../src/prisma/prisma.service.js', () => ({
+  PrismaService: class PrismaService {},
 }));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import type { Server } from 'node:http';
 import request from 'supertest';
-import { AppModule } from '../../src/app.module';
+import { AppModule } from '../../src/app.module.js';
+import { PrismaService } from '../../src/prisma/prisma.service.js';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -24,9 +15,16 @@ describe('AppController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({
+        $connect: jest.fn(),
+        $disconnect: jest.fn(),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
@@ -34,7 +32,16 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
+  it('/api/v1 (GET)', () => {
+    return request(app.getHttpServer() as Server)
+      .get('/api/v1')
+      .expect(200)
+      .expect({ status: 'ok' });
+  });
+
+  it('/api/v1/auth/me rejects unauthenticated requests', () => {
+    return request(app.getHttpServer() as Server)
+      .get('/api/v1/auth/me')
+      .expect(401);
   });
 });

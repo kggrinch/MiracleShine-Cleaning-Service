@@ -7,6 +7,8 @@ import compression from 'compression';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('api/v1');
+
   // Enable CORS so browser clients can call this API from allowed origins.
   // Use CORS_ORIGIN to restrict access in production, or '*' for local testing.
   app.enableCors({

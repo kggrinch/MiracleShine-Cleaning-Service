@@ -79,7 +79,21 @@
       "**/test/unit/**/*.spec.ts"
     ],
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "useESM": false,
+          "tsconfig": {
+            "module": "CommonJS",
+            "moduleResolution": "Node",
+            "resolvePackageJsonExports": false,
+            "esModuleInterop": true
+          }
+        }
+      ]
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     },
     "collectCoverageFrom": [
       "src/**/*.(t|j)s"

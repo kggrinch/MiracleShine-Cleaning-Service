@@ -7,12 +7,18 @@
     "^.+\\.(t|j)s$": [
       "ts-jest",
       {
-        "tsconfig": "<rootDir>/tsconfig.json",
-        "useESM": false
+        "useESM": false,
+        "tsconfig": {
+          "module": "CommonJS",
+          "moduleResolution": "Node",
+          "resolvePackageJsonExports": false,
+          "esModuleInterop": true
+        }
       }
     ]
   },
   "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/src/$1"
+    "^src/(.*)$": "<rootDir>/src/$1",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }
