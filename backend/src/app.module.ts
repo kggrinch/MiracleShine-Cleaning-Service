@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { CustomerModule } from './modules/customer/customer.module.js';
+// import { CustomerModule } from './modules/customer/customer.module.js';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module.js';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    PrismaModule,
-    CustomerModule],
+  // imports: [
+  //   ConfigModule.forRoot({
+  //     isGlobal: true,
+  //   }),
+  //   PrismaModule,
+  //   CustomerModule],
   controllers: [AppController],
   providers: [AppService],
 })
