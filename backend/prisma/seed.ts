@@ -1,3 +1,6 @@
+
+import "dotenv/config";
+import bcrypt from "bcrypt";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -7,179 +10,286 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
-const customers = [
-  {
-    first_name: "Alice",
-    last_name: "Smith",
-    email: "alice.smith@example.com",
-    phone: "111-222-3333",
-    passport_number: "PS123456",
-  },
-  {
-    first_name: "Bob",
-    last_name: "Johnson",
-    email: "bob.j@example.com",
-    phone: "444-555-6666",
-    passport_number: "PS789012",
-  },
-  {
-    first_name: "Charlie",
-    last_name: "Brown",
-    email: "cbrownie@example.com",
-    phone: "777-888-9999",
-    passport_number: "PS345678",
-  },
-  {
-    first_name: "Diana",
-    last_name: "Prince",
-    email: "diana.p@example.com",
-    phone: "222-333-4444",
-    passport_number: "PS901234",
-  },
-  {
-    first_name: "Eve",
-    last_name: "Adams",
-    email: "eve.a@example.com",
-    phone: "555-666-7777",
-    passport_number: "PS567890",
-  },
-  {
-    first_name: "Frank",
-    last_name: "White",
-    email: "frank.w@example.com",
-    phone: "888-999-0000",
-    passport_number: "PS654321",
-  },
-  {
-    first_name: "Grace",
-    last_name: "Taylor",
-    email: "grace.t@example.com",
-    phone: "123-456-7890",
-    passport_number: "PS098765",
-  },
-  {
-    first_name: "Henry",
-    last_name: "Miller",
-    email: "henry.m@example.com",
-    phone: "321-654-9870",
-    passport_number: "PS246813",
-  },
-  {
-    first_name: "Ivy",
-    last_name: "Davis",
-    email: "ivy.d@example.com",
-    phone: "987-654-3210",
-    passport_number: "PS135792",
-  },
-  {
-    first_name: "Jack",
-    last_name: "Garcia",
-    email: "jack.g@example.com",
-    phone: "987-654-3212",
-    passport_number: "PS864209",
-  },
-  {
-    first_name: "Jerry",
-    last_name: "Jones",
-    email: "JerrJ.g@example.com",
-    phone: "967-694-3112",
-    passport_number: "PS864569",
-  },
-  {
-    first_name: "Liam",
-    last_name: "Walker",
-    email: "liam.w@example.com",
-    phone: "222-444-6666",
-    passport_number: "PS777888",
-  },
-  {
-    first_name: "Mia",
-    last_name: "Harris",
-    email: "mia.h@example.com",
-    phone: "333-555-7777",
-    passport_number: "PS888999",
-  },
-  {
-    first_name: "Noah",
-    last_name: "Clark",
-    email: "noah.c@example.com",
-    phone: "444-666-8888",
-    passport_number: "PS999000",
-  },
-  {
-    first_name: "Olivia",
-    last_name: "Lewis",
-    email: "olivia.l@example.com",
-    phone: "555-777-9999",
-    passport_number: "PS111222",
-  },
-  {
-    first_name: "Sophia",
-    last_name: "Hall",
-    email: "sophia.h@example.com",
-    phone: "666-888-0000",
-    passport_number: "PS333444",
-  },
-];
-
-const credentials = [
-  { email: "alice.smith@example.com", username: "asmith", password: "pass123" },
-  { email: "bob.j@example.com", username: "bjohnson", password: "securepwd" },
-  { email: "cbrownie@example.com", username: "cbrown", password: "mysecret" },
-  { email: "diana.p@example.com", username: "dprince", password: "wonderw" },
-  { email: "eve.a@example.com", username: "eadams", password: "evypass" },
-  { email: "frank.w@example.com", username: "fwhite", password: "frankpwd" },
-  { email: "grace.t@example.com", username: "gtaylor", password: "gracet" },
-  { email: "henry.m@example.com", username: "hmiller", password: "henry_m" },
-  { email: "ivy.d@example.com", username: "idavis", password: "ivy_d" },
-  { email: "jack.g@example.com", username: "jgarcia", password: "jackg" },
-  { email: "JerrJ.g@example.com", username: "jjones", password: "jj123" },
-  { email: "liam.w@example.com", username: "lwalker", password: "liampass" },
-  { email: "mia.h@example.com", username: "mharris", password: "miapass" },
-  { email: "noah.c@example.com", username: "nclark", password: "noahpass" },
-  { email: "olivia.l@example.com", username: "olewis", password: "oliviapass" },
-  { email: "sophia.h@example.com", username: "shall", password: "sophiapass" },
-];
-
 async function main() {
-  await prisma.authentication.deleteMany();
-  await prisma.customer.deleteMany();
+  // Hash demo passwords instead of storing plain-text passwords.
+  const demoPasswordHash = await bcrypt.hash(
+    "DemoPassword123!",
+    12,
+  );
 
-  const createdCustomers = [] as Array<{ user_id: number; email: string }>;
+  // Clear existing demo records in dependency order.
+  await prisma.review.deleteMany();
+  await prisma.appointment.deleteMany();
+  await prisma.contactMessage.deleteMany();
+  await prisma.quoteRequest.deleteMany();
+  await prisma.service.deleteMany();
+  await prisma.user.deleteMany();
 
-  for (const customerData of customers) {
-    const customer = await prisma.customer.create({
-      data: customerData,
-    });
+  // 1. Users
+  const admin = await prisma.user.create({
+    data: {
+      firstName: "MiracleShine",
+      lastName: "Admin",
+      email: "admin@example.com",
+      passwordHash: demoPasswordHash,
+      role: "ADMIN",
+    },
+  });
 
-    createdCustomers.push({ user_id: customer.user_id, email: customer.email });
-  }
+  const customer1 = await prisma.user.create({
+    data: {
+      firstName: "Alex",
+      lastName: "Morgan",
+      email: "alex.morgan@example.com",
+      passwordHash: demoPasswordHash,
+      phone: "425-555-0101",
+    },
+  });
 
-  for (const credential of credentials) {
-    const customer = createdCustomers.find((entry) => entry.email === credential.email);
+  const customer2 = await prisma.user.create({
+    data: {
+      firstName: "Jamie",
+      lastName: "Taylor",
+      email: "jamie.taylor@example.com",
+      passwordHash: demoPasswordHash,
+      phone: "425-555-0102",
+    },
+  });
 
-    if (!customer) {
-      continue;
-    }
+  const customer3 = await prisma.user.create({
+    data: {
+      firstName: "Sam",
+      lastName: "Jordan",
+      email: "sam.jordan@example.com",
+      passwordHash: demoPasswordHash,
+      phone: "425-555-0103",
+    },
+  });
 
-    await prisma.authentication.create({
+  // 2. Services
+  const services = await Promise.all([
+    prisma.service.create({
       data: {
-        user_id: customer.user_id,
-        username: credential.username,
-        password: credential.password,
+        name: "Residential Cleaning",
+        description: "Routine cleaning for houses and apartments.",
+        category: "RESIDENTIAL",
+        startingPrice: "120.00",
+        estimatedDurationMinutes: 120,
       },
-    });
-  }
+    }),
+    prisma.service.create({
+      data: {
+        name: "Commercial Cleaning",
+        description: "Cleaning services for commercial properties.",
+        category: "COMMERCIAL",
+        startingPrice: "200.00",
+        estimatedDurationMinutes: 180,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Deep Cleaning",
+        description: "Detailed cleaning of hard-to-reach areas.",
+        category: "RESIDENTIAL",
+        startingPrice: "180.00",
+        estimatedDurationMinutes: 240,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Move In / Move Out Cleaning",
+        description: "Cleaning for properties before or after a move.",
+        category: "RESIDENTIAL",
+        startingPrice: "220.00",
+        estimatedDurationMinutes: 240,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Disinfecting and Sanitizing",
+        description: "Cleaning focused on frequently touched surfaces.",
+        category: "SPECIALTY",
+        startingPrice: "150.00",
+        estimatedDurationMinutes: 120,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Post Construction Cleaning",
+        description: "Removal of dust and debris after construction.",
+        category: "SPECIALTY",
+        startingPrice: "300.00",
+        estimatedDurationMinutes: 300,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Carpet Cleaning",
+        description: "Cleaning service for carpets and rugs.",
+        category: "SPECIALTY",
+        startingPrice: "100.00",
+        estimatedDurationMinutes: 90,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Office Cleaning",
+        description: "Cleaning for offices and workspaces.",
+        category: "COMMERCIAL",
+        startingPrice: "175.00",
+        estimatedDurationMinutes: 150,
+      },
+    }),
+    prisma.service.create({
+      data: {
+        name: "Specialty Cleaning",
+        description: "Custom cleaning for specific customer needs.",
+        category: "SPECIALTY",
+        startingPrice: null,
+        estimatedDurationMinutes: 120,
+      },
+    }),
+  ]);
 
-  console.log(`Seeded ${customers.length} customers and ${credentials.length} authentication records.`);
+  // 3. Quote requests
+  const quote1 = await prisma.quoteRequest.create({
+    data: {
+      userId: customer1.id,
+      serviceId: services[0].id,
+      customerFirstName: "Alex",
+      customerLastName: "Morgan",
+      customerEmail: "alex.morgan@example.com",
+      customerPhone: "425-555-0101",
+      propertyType: "HOUSE",
+      squareFootage: 1800,
+      bedrooms: 3,
+      bathrooms: "2.0",
+      streetAddress: "100 Main Street",
+      city: "Edmonds",
+      state: "WA",
+      postalCode: "98020",
+      preferredDate: new Date("2026-11-05T00:00:00.000Z"),
+      preferredTime: new Date("1970-01-01T10:00:00.000Z"),
+      notes: "Please focus on the kitchen and bathrooms.",
+      status: "ACCEPTED",
+    },
+  });
+
+  const quote2 = await prisma.quoteRequest.create({
+    data: {
+      userId: customer2.id,
+      serviceId: services[1].id,
+      customerFirstName: "Jamie",
+      customerLastName: "Taylor",
+      customerEmail: "jamie.taylor@example.com",
+      customerPhone: "425-555-0102",
+      propertyType: "OFFICE",
+      squareFootage: 3500,
+      streetAddress: "200 Business Park Drive",
+      city: "Lynnwood",
+      state: "WA",
+      postalCode: "98036",
+      preferredDate: new Date("2026-11-07T00:00:00.000Z"),
+      preferredTime: new Date("1970-01-01T09:00:00.000Z"),
+      notes: "Requesting a recurring commercial cleaning estimate.",
+      status: "PENDING",
+    },
+  });
+
+  const quote3 = await prisma.quoteRequest.create({
+    data: {
+      userId: null,
+      serviceId: services[2].id,
+      customerFirstName: "Morgan",
+      customerLastName: "Lee",
+      customerEmail: "morgan.lee@example.com",
+      customerPhone: "425-555-0104",
+      propertyType: "APARTMENT",
+      squareFootage: 950,
+      bedrooms: 2,
+      bathrooms: "1.5",
+      streetAddress: "300 Example Avenue",
+      city: "Mountlake Terrace",
+      state: "WA",
+      postalCode: "98043",
+      notes: "Guest quote request without an account.",
+      status: "CONTACTED",
+    },
+  });
+
+  // 4. Appointments — one appointment per quote in this design.
+  const appointment1 = await prisma.appointment.create({
+    data: {
+      quoteRequestId: quote1.id,
+      scheduledDate: new Date("2026-11-05T00:00:00.000Z"),
+      startTime: new Date("1970-01-01T10:00:00.000Z"),
+      endTime: new Date("1970-01-01T12:00:00.000Z"),
+      status: "CONFIRMED",
+      notes: "Customer confirmed the requested time.",
+    },
+  });
+
+  await prisma.appointment.create({
+    data: {
+      quoteRequestId: quote2.id,
+      scheduledDate: new Date("2026-11-07T00:00:00.000Z"),
+      startTime: new Date("1970-01-01T09:00:00.000Z"),
+      endTime: new Date("1970-01-01T12:00:00.000Z"),
+      status: "REQUESTED",
+      notes: "Pending confirmation.",
+    },
+  });
+
+  // 5. Contact messages
+  await prisma.contactMessage.create({
+    data: {
+      userId: customer3.id,
+      customerName: "Sam Jordan",
+      email: "sam.jordan@example.com",
+      phone: "425-555-0103",
+      subject: "Commercial cleaning question",
+      message: "Do you offer recurring weekly office cleaning?",
+      status: "NEW",
+    },
+  });
+
+  await prisma.contactMessage.create({
+    data: {
+      userId: null,
+      customerName: "Casey Brown",
+      email: "casey.brown@example.com",
+      subject: "Service area",
+      message: "Do you provide cleaning services in my neighborhood?",
+      status: "READ",
+    },
+  });
+
+  // 6. Review
+  await prisma.review.create({
+    data: {
+      appointmentId: appointment1.id,
+      rating: 5,
+      comment: "The team was professional and thorough.",
+      status: "APPROVED",
+    },
+  });
+
+  console.log({
+    users: await prisma.user.count(),
+    services: await prisma.service.count(),
+    quoteRequests: await prisma.quoteRequest.count(),
+    appointments: await prisma.appointment.count(),
+    contactMessages: await prisma.contactMessage.count(),
+    reviews: await prisma.review.count(),
+    adminEmail: admin.email,
+  });
 }
 
 main()
   .catch((error) => {
     console.error("Seed failed:", error);
-    process.exit(1);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();
   });
-
