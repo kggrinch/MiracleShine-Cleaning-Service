@@ -42,6 +42,7 @@ import { Clock3, Mail, MapPin, Phone, Sparkles } from 'lucide-vue-next'
           <li><RouterLink to="/services" class="transition hover:text-primary">Services</RouterLink></li>
           <li><RouterLink to="/about" class="transition hover:text-primary">About Us</RouterLink></li>
           <li><RouterLink to="/reviews" class="transition hover:text-primary">Reviews</RouterLink></li>
+          <li><RouterLink to="/account" class="transition hover:text-primary">Customer Account</RouterLink></li>
           <li><RouterLink to="/get-quote" class="transition hover:text-primary">Contact</RouterLink></li>
         </ul>
       </div>

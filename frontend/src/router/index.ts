@@ -4,6 +4,7 @@ import AboutView from '../views/AboutView.vue'
 import ServicesView from '../views/ServicesView.vue'
 import ContactQuoteView from '../views/ContactQuoteView.vue'
 import ReviewsView from '../views/ReviewsView.vue'
+import AccountView from '../views/AccountView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 
 const router = createRouter({
@@ -37,6 +38,11 @@ const router = createRouter({
       path: '/reviews',
       name: 'reviews',
       component: ReviewsView,
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: AccountView,
     },
     {
       // Preserve existing contact bookmarks while keeping one canonical quote destination.

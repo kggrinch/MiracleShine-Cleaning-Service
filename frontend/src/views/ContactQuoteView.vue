@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import ContactQuotePanel from '@/components/contact/ContactQuotePanel.vue'
+import ContactMessageForm from '@/components/contact/ContactMessageForm.vue'
 import QuoteForm from '@/components/sections/QuoteForm.vue'
 import BackgroundDecor from '@/components/ui/BackgroundDecor.vue'
 
@@ -42,5 +43,7 @@ const content = computed(() => {
       <!-- Compact quote section that sits alongside the intro panel -->
       <QuoteForm compact />
     </section>
+
+    <ContactMessageForm />
   </div>
 </template>

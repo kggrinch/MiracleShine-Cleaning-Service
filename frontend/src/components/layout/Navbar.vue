@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, Phone, Sparkles, X } from 'lucide-vue-next'
 import AppButton from '@/components/ui/AppButton.vue'
+import { hasSession } from '@/services/session'
 
 const route = useRoute()
 
 // Primary navigation. "Services" is a plain top-level link that navigates
 // directly to the services page - there is no dropdown or submenu.
-const links = [
+const links = computed(() => [
   { name: 'Home', to: '/' },
   { name: 'Services', to: '/services' },
   { name: 'About Us', to: '/about' },
   { name: 'Reviews', to: '/reviews' },
+  { name: hasSession.value ? 'My Account' : 'Sign In', to: '/account' },
   { name: 'Contact', to: '/get-quote' },
-]
+])
 
 const mobileMenuOpen = ref(false)
 

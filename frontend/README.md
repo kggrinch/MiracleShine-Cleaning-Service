@@ -47,6 +47,13 @@ npm run build
 npm run test:unit
 ```
 
+### Backend API
+
+The frontend uses the NestJS API at `http://localhost:3000/api/v1` by default.
+Set `VITE_API_BASE_URL` to the backend origin or to a URL that already ends in
+`/api/v1` when using another environment. The quote and contact forms, customer
+account, appointments, and published reviews use the backend API directly.
+
 ### Run End-to-End Tests with [Playwright](https://playwright.dev)
 
 ```sh

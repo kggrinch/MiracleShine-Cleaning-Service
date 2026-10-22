@@ -1,45 +1,32 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ArrowLeft, ArrowRight, Star } from 'lucide-vue-next'
+import { fetchPublicReviews, getApiErrorMessage, type PublicReview } from '@/services/backend'
 
-type Review = {
-  name: string
-  title: string
-  quote: string
-}
-
-// Social proof cards to reinforce trust and perceived quality.
-const reviews: Review[] = [
-  {
-    name: 'Maria T.',
-    title: 'Homeowner',
-    quote: 'The team was punctual, thoughtful, and left every room sparkling. It feels like a fresh start every time.',
-  },
-  {
-    name: 'Jason & Lauren',
-    title: 'Property Managers',
-    quote: 'Their attention to detail and communication makes them our go-to cleaning partner for every turnover.',
-  },
-  {
-    name: 'Diana P.',
-    title: 'Office Manager',
-    quote: 'Professional, reliable, and polished. Our office always feels welcoming after each visit.',
-  },
-]
-
+const reviews = ref<PublicReview[]>([])
 const activeIndex = ref(0)
+const loading = ref(true)
+const error = ref('')
+const currentReview = computed(() => reviews.value[activeIndex.value])
 
-const currentReview = computed(() => {
-  const index = Math.max(0, Math.min(activeIndex.value, reviews.length - 1))
-  return reviews[index] as Review
+onMounted(async () => {
+  try {
+    reviews.value = await fetchPublicReviews()
+  } catch (cause) {
+    error.value = getApiErrorMessage(cause, 'Reviews are temporarily unavailable.')
+  } finally {
+    loading.value = false
+  }
 })
 
 function nextReview() {
-  activeIndex.value = (activeIndex.value + 1) % reviews.length
+  if (reviews.value.length) activeIndex.value = (activeIndex.value + 1) % reviews.value.length
 }
 
 function prevReview() {
-  activeIndex.value = (activeIndex.value - 1 + reviews.length) % reviews.length
+  if (reviews.value.length) {
+    activeIndex.value = (activeIndex.value - 1 + reviews.value.length) % reviews.value.length
+  }
 }
 </script>
 
@@ -53,8 +40,7 @@ function prevReview() {
             Loved by customers for dependable service and beautiful results.
           </h2>
         </div>
-
-        <div class="flex gap-2">
+        <div v-if="reviews.length > 1" class="flex gap-2">
           <button type="button" @click="prevReview" aria-label="Previous review" class="rounded-full border border-slate-300 bg-white p-3 text-slate-700 transition hover:border-primary hover:text-primary">
             <ArrowLeft class="h-4 w-4" />
           </button>
@@ -65,23 +51,27 @@ function prevReview() {
       </div>
 
       <div class="mt-10 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_22px_70px_-30px_rgba(15,23,42,0.35)] sm:p-10" aria-live="polite">
-        <div class="flex items-center gap-1 text-accent">
-          <Star v-for="n in 5" :key="n" class="h-5 w-5 fill-current" />
-        </div>
-
-        <blockquote class="mt-6 text-xl leading-9 text-slate-700 sm:text-2xl">
-          “{{ currentReview.quote }}”
-        </blockquote>
-
-        <div class="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p class="font-semibold text-slate-900">{{ currentReview.name }}</p>
-            <p class="text-sm text-slate-500">{{ currentReview.title }}</p>
+        <p v-if="loading" class="text-slate-600" role="status">Loading customer reviews…</p>
+        <p v-else-if="error" class="text-sm text-red-700" role="alert">{{ error }}</p>
+        <p v-else-if="!currentReview" class="text-slate-600">No customer reviews have been published yet.</p>
+        <template v-else>
+          <div class="flex items-center gap-1 text-accent" :aria-label="`${currentReview.rating} out of 5 stars`">
+            <Star v-for="n in currentReview.rating" :key="n" class="h-5 w-5 fill-current" />
           </div>
-          <div class="flex gap-2">
-            <button v-for="(review, index) in reviews" :key="review.name" type="button" class="h-2.5 w-2.5 rounded-full transition" :class="activeIndex === index ? 'bg-primary' : 'bg-slate-300'" :aria-label="`Show review ${index + 1}`" :aria-current="activeIndex === index ? 'true' : 'false'" @click="activeIndex = index" />
+          <blockquote v-if="currentReview.comment" class="mt-6 text-xl leading-9 text-slate-700 sm:text-2xl">
+            “{{ currentReview.comment }}”
+          </blockquote>
+          <p v-else class="mt-6 text-xl leading-9 text-slate-700 sm:text-2xl">A customer rated their {{ currentReview.appointment.quoteRequest.service.name }} experience.</p>
+          <div class="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="font-semibold text-slate-900">{{ currentReview.appointment.quoteRequest.customerFirstName }}</p>
+              <p class="text-sm text-slate-500">{{ currentReview.appointment.quoteRequest.service.name }}</p>
+            </div>
+            <div class="flex gap-2">
+              <button v-for="(review, index) in reviews" :key="review.id" type="button" class="h-2.5 w-2.5 rounded-full transition" :class="activeIndex === index ? 'bg-primary' : 'bg-slate-300'" :aria-label="`Show review ${index + 1}`" :aria-current="activeIndex === index ? 'true' : 'false'" @click="activeIndex = index" />
+            </div>
           </div>
-        </div>
+        </template>
       </div>
     </div>
   </section>
