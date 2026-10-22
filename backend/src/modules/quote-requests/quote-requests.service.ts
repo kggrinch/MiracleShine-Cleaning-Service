@@ -7,12 +7,16 @@ import {
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import {
-  IsBoolean,
   IsEmail,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
+  IsDateString,
+  IsInt,
+  IsUUID,
+  Matches,
+  MaxLength,
   Max,
   Min,
   MinLength,
@@ -21,19 +25,23 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 
 export class CreateQuoteRequestDto {
   @IsOptional()
-  @IsString()
+  @IsUUID()
+  @MaxLength(36)
   serviceId?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(150)
   service?: string;
 
   @IsString()
   @MinLength(2)
+  @MaxLength(100)
   customerFirstName!: string;
 
   @IsString()
   @MinLength(2)
+  @MaxLength(100)
   customerLastName!: string;
 
   @IsEmail()
@@ -41,6 +49,7 @@ export class CreateQuoteRequestDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(30)
   customerPhone?: string;
 
   @IsEnum(['HOUSE', 'APARTMENT', 'OFFICE', 'OTHER'])
@@ -48,55 +57,68 @@ export class CreateQuoteRequestDto {
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
   @Min(0)
   squareFootage?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
   @Min(0)
   bedrooms?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 1 })
   @Min(0)
   @Max(99)
   bathrooms?: number;
 
   @IsString()
   @MinLength(3)
+  @MaxLength(255)
   streetAddress!: string;
 
   @IsString()
   @MinLength(2)
+  @MaxLength(100)
   city!: string;
 
   @IsString()
   @MinLength(2)
+  @MaxLength(100)
   state!: string;
 
   @IsString()
   @MinLength(3)
+  @MaxLength(20)
   postalCode!: string;
 
   @IsOptional()
-  @IsString()
+  @IsDateString({ strict: true })
   preferredDate?: string;
 
   @IsOptional()
-  @IsString()
+  @Matches(/^(?:[01]\d|2[0-3]):[0-5]\d$/)
   preferredTime?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(5000)
   notes?: string;
 }
 
 export class UpdateQuoteStatusDto {
-  @IsEnum(['PENDING', 'CONTACTED', 'QUOTED', 'ACCEPTED', 'DECLINED', 'COMPLETED'])
-  status!: 'PENDING' | 'CONTACTED' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'COMPLETED';
+  @IsEnum([
+    'PENDING',
+    'CONTACTED',
+    'QUOTED',
+    'ACCEPTED',
+    'DECLINED',
+    'COMPLETED',
+  ])
+  status!:
+    'PENDING' | 'CONTACTED' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'COMPLETED';
 }
 
 export class UpdateQuoteRequestDto extends PartialType(CreateQuoteRequestDto) {}
@@ -104,13 +126,6 @@ export class UpdateQuoteRequestDto extends PartialType(CreateQuoteRequestDto) {}
 @Injectable()
 export class QuoteRequestsService {
   constructor(private readonly prisma: PrismaService) {}
-
-  async findPublicQuotes() {
-    return this.prisma.quoteRequest.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { service: true, user: true },
-    });
-  }
 
   async findCustomerQuotes(userId: string) {
     return this.prisma.quoteRequest.findMany({
@@ -123,19 +138,15 @@ export class QuoteRequestsService {
   async findOne(id: string, userId?: string, admin = false) {
     const quote = await this.prisma.quoteRequest.findUnique({
       where: { id },
-      include: { service: true, user: true, appointment: true },
+      include: { service: true, appointment: true },
     });
 
     if (!quote) {
       throw new NotFoundException('Quote request not found.');
     }
 
-    if (!admin && userId && quote.userId !== userId) {
-      throw new UnauthorizedException('You do not have access to this quote request.');
-    }
-
-    if (!admin && !userId && quote.userId) {
-      throw new UnauthorizedException('You do not have access to this quote request.');
+    if (!admin && (!userId || quote.userId !== userId)) {
+      throw new NotFoundException('Quote request not found.');
     }
 
     return quote;
@@ -143,7 +154,18 @@ export class QuoteRequestsService {
 
   async create(dto: CreateQuoteRequestDto, userId?: string) {
     const service = await this.resolveService(dto);
-    const normalizedStreet = dto.streetAddress.trim();
+    const preferredDate = dto.preferredDate
+      ? new Date(dto.preferredDate)
+      : null;
+    if (preferredDate && Number.isNaN(preferredDate.getTime())) {
+      throw new BadRequestException('Preferred date must be a valid date.');
+    }
+    const preferredTime = dto.preferredTime
+      ? new Date(`1970-01-01T${dto.preferredTime}:00.000Z`)
+      : null;
+    if (preferredTime && Number.isNaN(preferredTime.getTime())) {
+      throw new BadRequestException('Preferred time must be a valid time.');
+    }
 
     return this.prisma.quoteRequest.create({
       data: {
@@ -157,12 +179,12 @@ export class QuoteRequestsService {
         squareFootage: dto.squareFootage ?? null,
         bedrooms: dto.bedrooms ?? null,
         bathrooms: dto.bathrooms !== undefined ? String(dto.bathrooms) : null,
-        streetAddress: normalizedStreet,
+        streetAddress: dto.streetAddress.trim(),
         city: dto.city.trim(),
         state: dto.state.trim(),
         postalCode: dto.postalCode.trim(),
-        preferredDate: dto.preferredDate ? new Date(dto.preferredDate) : null,
-        preferredTime: dto.preferredTime ? new Date(`1970-01-01T${dto.preferredTime}:00.000Z`) : null,
+        preferredDate,
+        preferredTime,
         notes: dto.notes?.trim() || null,
         status: 'PENDING',
       },
@@ -176,29 +198,44 @@ export class QuoteRequestsService {
       throw new NotFoundException('Quote request not found.');
     }
 
-    if (!admin && userId && quote.userId !== userId) {
-      throw new UnauthorizedException('You do not have access to this quote request.');
+    if (!admin && (!userId || quote.userId !== userId)) {
+      throw new NotFoundException('Quote request not found.');
     }
 
     if (quote.status === 'DECLINED' || quote.status === 'COMPLETED') {
-      throw new BadRequestException('This quote cannot be cancelled in its current status.');
+      throw new BadRequestException(
+        'This quote cannot be cancelled in its current status.',
+      );
     }
 
-    return this.prisma.quoteRequest.update({
-      where: { id },
+    const result = await this.prisma.quoteRequest.updateMany({
+      where: { id, status: quote.status },
       data: { status: 'DECLINED' },
+    });
+    if (result.count === 0) {
+      throw new BadRequestException(
+        'The quote status changed. Refresh and try again.',
+      );
+    }
+    return this.prisma.quoteRequest.findUnique({
+      where: { id },
       include: { service: true },
     });
   }
 
-  async updateStatus(id: string, dto: UpdateQuoteStatusDto, userId?: string, admin = false) {
+  async updateStatus(
+    id: string,
+    dto: UpdateQuoteStatusDto,
+    userId?: string,
+    admin = false,
+  ) {
     const quote = await this.prisma.quoteRequest.findUnique({ where: { id } });
     if (!quote) {
       throw new NotFoundException('Quote request not found.');
     }
 
-    if (!admin && userId && quote.userId !== userId) {
-      throw new UnauthorizedException('You do not have access to this quote request.');
+    if (!admin && (!userId || quote.userId !== userId)) {
+      throw new NotFoundException('Quote request not found.');
     }
 
     const allowedTransitions: Record<string, string[]> = {
@@ -211,7 +248,9 @@ export class QuoteRequestsService {
     };
 
     if (!admin && dto.status !== 'DECLINED') {
-      throw new UnauthorizedException('Only administrators can update quote status.');
+      throw new UnauthorizedException(
+        'Only administrators can update quote status.',
+      );
     }
 
     const currentStatus = quote.status;
@@ -222,14 +261,26 @@ export class QuoteRequestsService {
       );
     }
 
-    return this.prisma.quoteRequest.update({
-      where: { id },
+    const result = await this.prisma.quoteRequest.updateMany({
+      where: { id, status: currentStatus },
       data: { status: dto.status },
+    });
+    if (result.count === 0) {
+      throw new BadRequestException(
+        'The quote status changed. Refresh and try again.',
+      );
+    }
+    return this.prisma.quoteRequest.findUnique({
+      where: { id },
       include: { service: true },
     });
   }
 
-  async findAllAdmin(filters?: { status?: string; email?: string; serviceId?: string }) {
+  async findAllAdmin(filters?: {
+    status?: string;
+    email?: string;
+    serviceId?: string;
+  }) {
     const where: Record<string, any> = {};
 
     if (filters?.status) {
@@ -237,7 +288,10 @@ export class QuoteRequestsService {
     }
 
     if (filters?.email) {
-      where.customerEmail = { contains: filters.email.trim(), mode: 'insensitive' };
+      where.customerEmail = {
+        contains: filters.email.trim(),
+        mode: 'insensitive',
+      };
     }
 
     if (filters?.serviceId) {
@@ -247,13 +301,29 @@ export class QuoteRequestsService {
     return this.prisma.quoteRequest.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      include: { service: true, user: true },
+      include: {
+        service: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            role: true,
+            isActive: true,
+            createdAt: true,
+          },
+        },
+      },
     });
   }
 
   private async resolveService(dto: CreateQuoteRequestDto) {
     if (dto.serviceId) {
-      const service = await this.prisma.service.findUnique({ where: { id: dto.serviceId } });
+      const service = await this.prisma.service.findUnique({
+        where: { id: dto.serviceId },
+      });
       if (!service || !service.isActive) {
         throw new BadRequestException('The selected service is unavailable.');
       }

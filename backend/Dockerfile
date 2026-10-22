@@ -9,6 +9,7 @@ RUN npm install
 COPY prisma ./prisma
 COPY generated ./generated
 COPY src ./src
+COPY scripts ./scripts
 COPY tsconfig*.json ./
 COPY prisma.config.ts ./prisma.config.ts
 
@@ -31,12 +32,12 @@ ENV NODE_ENV=production \
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 3000
 
 # cmd overwritten by docker-compose.yml command, but kept here for security
 CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/src/main.js"]
-
 
 

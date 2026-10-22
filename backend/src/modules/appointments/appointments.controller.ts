@@ -20,7 +20,7 @@ import {
 } from './appointments.service.js';
 
 type AuthenticatedRequest = Request & {
-  user?: { id?: string; role?: string };
+  user?: { id: string; role: 'CUSTOMER' | 'ADMIN' };
 };
 
 @Controller('appointments')
@@ -30,14 +30,18 @@ export class AppointmentsController {
   @Post()
   @UseGuards(AuthGuard)
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateAppointmentDto) {
-    const userId = this.extractUserId(req);
-    return this.appointmentsService.create(dto, userId);
+    const user = req.user;
+    return this.appointmentsService.create(
+      dto,
+      user?.id,
+      user?.role === 'ADMIN',
+    );
   }
 
   @Get('me')
   @UseGuards(AuthGuard)
   async getMine(@Req() req: AuthenticatedRequest) {
-    const userId = this.extractUserId(req);
+    const userId = req.user?.id;
     if (!userId) {
       throw new UnauthorizedException('Authentication required.');
     }
@@ -48,35 +52,23 @@ export class AppointmentsController {
   @Get(':id')
   @UseGuards(AuthGuard)
   async getOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
-    const userId = this.extractUserId(req);
-    const admin = this.isAdmin(req);
-    return this.appointmentsService.findById(id, userId, admin);
+    const user = req.user;
+    return this.appointmentsService.findById(
+      id,
+      user?.id,
+      user?.role === 'ADMIN',
+    );
   }
 
   @Post(':id/cancel')
   @UseGuards(AuthGuard)
   async cancel(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
-    const userId = this.extractUserId(req);
-    const admin = this.isAdmin(req);
-    return this.appointmentsService.cancel(id, userId, admin);
-  }
-
-  private extractUserId(req: AuthenticatedRequest): string | undefined {
-    const xUserId = req.headers['x-user-id'];
-    if (typeof xUserId === 'string') return xUserId;
-    if (Array.isArray(xUserId) && xUserId.length > 0) return xUserId[0];
-
-    const auth = req.headers.authorization;
-    if (typeof auth === 'string' && auth.startsWith('Bearer ')) {
-      return auth.replace(/^Bearer\s+/i, '').replace(/^demo-/, '');
-    }
-
-    return req.user?.id;
-  }
-
-  private isAdmin(req: AuthenticatedRequest): boolean {
-    const role = req.user?.role ?? req.headers['x-user-role'];
-    return typeof role === 'string' ? role === 'ADMIN' : false;
+    const user = req.user;
+    return this.appointmentsService.cancel(
+      id,
+      user?.id,
+      user?.role === 'ADMIN',
+    );
   }
 }
 
@@ -94,7 +86,10 @@ export class AdminAppointmentsController {
   @Patch('appointments/:id/status')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateAppointmentStatusDto,
+  ) {
     return this.appointmentsService.updateStatus(id, dto, true);
   }
 }

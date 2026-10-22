@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
+import { OptionalAuthGuard } from '../auth/optional-auth.guard.js';
 import { RequireRoles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import {
@@ -21,7 +22,7 @@ import {
 } from './quote-requests.service.js';
 
 type AuthenticatedRequest = Request & {
-  user?: { id?: string; role?: string };
+  user?: { id: string; role: 'CUSTOMER' | 'ADMIN' };
 };
 
 @Controller('quote-requests')
@@ -29,15 +30,15 @@ export class QuoteRequestsController {
   constructor(private readonly quoteRequestsService: QuoteRequestsService) {}
 
   @Post()
+  @UseGuards(OptionalAuthGuard)
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateQuoteRequestDto) {
-    const userId = this.extractUserId(req);
-    return this.quoteRequestsService.create(dto, userId);
+    return this.quoteRequestsService.create(dto, req.user?.id);
   }
 
   @Get('me')
   @UseGuards(AuthGuard)
   async getMine(@Req() req: AuthenticatedRequest) {
-    const userId = this.extractUserId(req);
+    const userId = req.user?.id;
     if (!userId) {
       throw new UnauthorizedException('Authentication required.');
     }
@@ -48,34 +49,23 @@ export class QuoteRequestsController {
   @Get(':id')
   @UseGuards(AuthGuard)
   async getOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
-    const userId = this.extractUserId(req);
-    return this.quoteRequestsService.findOne(id, userId, false);
+    const user = req.user;
+    return this.quoteRequestsService.findOne(
+      id,
+      user?.id,
+      user?.role === 'ADMIN',
+    );
   }
 
   @Post(':id/cancel')
   @UseGuards(AuthGuard)
   async cancel(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
-    const userId = this.extractUserId(req);
-    const admin = this.isAdmin(req);
-    return this.quoteRequestsService.cancel(id, userId, admin);
-  }
-
-  private extractUserId(req: AuthenticatedRequest): string | undefined {
-    const xUserId = req.headers['x-user-id'];
-    if (typeof xUserId === 'string') return xUserId;
-    if (Array.isArray(xUserId) && xUserId.length > 0) return xUserId[0];
-
-    const auth = req.headers.authorization;
-    if (typeof auth === 'string' && auth.startsWith('Bearer ')) {
-      return auth.replace(/^Bearer\s+/i, '').replace(/^demo-/, '');
-    }
-
-    return req.user?.id;
-  }
-
-  private isAdmin(req: AuthenticatedRequest): boolean {
-    const role = req.user?.role ?? req.headers['x-user-role'];
-    return typeof role === 'string' ? role === 'ADMIN' : false;
+    const user = req.user;
+    return this.quoteRequestsService.cancel(
+      id,
+      user?.id,
+      user?.role === 'ADMIN',
+    );
   }
 }
 

@@ -92,9 +92,7 @@ CORS_ORIGIN="http://localhost:3000,http://localhost:5173"
 JWT_SECRET="replace-me-in-production"
 ```
 
-Important note:
-- The project currently uses a lightweight demo bearer-token pattern for local auth rather than a production JWT implementation.
-- The file includes `JWT_SECRET` for compatibility with future upgrades, but the current auth flow is still token-based and user-id driven.
+Set `JWT_SECRET` to a randomly generated value of at least 32 bytes. The application refuses to start when it is missing or too short. Do not use the placeholder shown here as a real secret.
 
 ## 5. Database model summary
 
@@ -134,9 +132,9 @@ The backend uses the following enums:
 
 ### Current auth model
 
-The backend currently supports a demo bearer-token flow for local development.
+The API accepts only signed HS256 JWTs in the `Authorization: Bearer <token>` header. Tokens expire after one hour, and each request reloads the user from the database so inactive accounts are rejected. Caller-controlled identity headers do not establish identity or authorization.
 
-Supported auth patterns:
+Legacy examples such as demo tokens, `x-user-token`, `x-user-id`, and `x-user-role` are obsolete and not accepted.
 
 - `Authorization: Bearer demo-<user-id>`
 - `x-user-token: demo-<user-id>`
@@ -172,7 +170,7 @@ Response:
 
 ```json
 {
-  "token": "demo-8c2b11cb-131d-4d53-9e35-2d43d8b5d7f0",
+  "token": "<signed JWT>",
   "user": {
     "id": "8c2b11cb-131d-4d53-9e35-2d43d8b5d7f0",
     "firstName": "Jane",
@@ -231,6 +229,7 @@ Requires the auth guard. Returns the currently authenticated user profile with p
 | `GET` | `/api/v1/users/me` | Fetch current user profile | Yes |
 | `PATCH` | `/api/v1/users/me` | Update current user profile | Yes |
 | `GET` | `/api/v1/users/:id` | Fetch a specific user if the caller is that user or an admin | Yes |
+| `POST` | `/api/v1/users/admin` | Create another administrator | Admin |
 
 User update payload example:
 
@@ -250,9 +249,9 @@ User update payload example:
 | `GET` | `/api/v1/services` | List public services | No |
 | `GET` | `/api/v1/services/slug/:slug` | Lookup a service by slug | No |
 | `GET` | `/api/v1/services/:id` | Fetch one service by ID | No |
-| `POST` | `/api/v1/services` | Create a service | Usually admin |
-| `PATCH` | `/api/v1/services/:id` | Update a service | Usually admin |
-| `DELETE` | `/api/v1/services/:id` | Soft delete or deactivate a service | Usually admin |
+| `POST` | `/api/v1/services` | Create a service | Admin |
+| `PATCH` | `/api/v1/services/:id` | Update a service | Admin |
+| `DELETE` | `/api/v1/services/:id` | Soft delete or deactivate a service | Admin |
 | `GET` | `/api/v1/admin/services` | List services for admin users | Admin |
 | `POST` | `/api/v1/admin/services/reset-defaults` | Reset the default catalog entries | Admin |
 
@@ -260,13 +259,14 @@ Query parameters for `GET /api/v1/services`:
 
 - `category`: `RESIDENTIAL`, `COMMERCIAL`, `SPECIALTY`
 - `search`: free-text search across name and description
-- `isActive`: `true` or `false`
 
 Example:
 
 ```bash
-GET /api/v1/services?category=RESIDENTIAL&isActive=true&search=deep
+GET /api/v1/services?category=RESIDENTIAL&search=deep
 ```
+
+The public catalog only returns active services; the admin catalog endpoint can list inactive entries.
 
 ### 7.5 Quote request endpoints
 
@@ -338,7 +338,7 @@ Appointment creation example:
 | Method | Route | Description | Auth |
 |---|---|---|---|
 | `POST` | `/api/v1/contact-messages` | Submit a website contact form | No |
-| `GET` | `/api/v1/contact-messages/:id` | Fetch one message | No |
+| `GET` | `/api/v1/contact-messages/:id` | Fetch one message | Admin |
 | `GET` | `/api/v1/admin/contact-messages` | List all contact messages | Admin |
 | `PATCH` | `/api/v1/admin/contact-messages/:id/status` | Update a contact message status | Admin |
 
@@ -359,7 +359,7 @@ Example payload:
 | Method | Route | Description | Auth |
 |---|---|---|---|
 | `GET` | `/api/v1/reviews` | Public approved reviews only | No |
-| `POST` | `/api/v1/reviews` | Submit a review for an appointment | No |
+| `POST` | `/api/v1/reviews` | Submit a review for your completed appointment | Yes |
 | `GET` | `/api/v1/admin/reviews` | View all reviews | Admin |
 | `PATCH` | `/api/v1/admin/reviews/:id/status` | Approve or reject review | Admin |
 
@@ -410,10 +410,10 @@ npm run build
 
 Current tests cover:
 
-- auth service flow
-- duplicate-account prevention
-- invalid login rejection
-- basic unauthenticated access rejection
+- authentication, authorization, and customer ownership checks
+- quote, appointment, contact-message, service, user, and review business rules
+- DTO validation and database error handling
+- admin creation and first-admin bootstrap locking
 
 ## 11. Local development workflow
 
@@ -435,9 +435,40 @@ This implementation is a solid backend foundation for local development and prod
 
 Current limitations include:
 
-- demo bearer-token auth rather than real JWT implementation
-- simple role enforcement without more advanced permission policies
+- token revocation is not immediate; tokens remain usable for up to one hour unless the account is deactivated
 - no outbound messaging/email integration yet
-- no production secret rotation or session management
+- no production secret rotation or refresh-token/session management
 
 These are intentional choices for the current stage of the project, and the API is structured so it can be upgraded cleanly as the product matures.
+
+## 13. Administrator account creation
+
+Public `POST /api/v1/auth/register` always creates a `CUSTOMER`; the service assigns that role regardless of submitted input. An existing administrator can create another admin with `POST /api/v1/users/admin`, using the same name, email, and password fields as registration. The endpoint requires a signed admin token, rejects duplicate email addresses, hashes the password, and returns a safe user object.
+
+### Create the first administrator
+
+There is no unauthenticated HTTP bootstrap endpoint. Create the initial admin by running the explicit one-time CLI command from the `backend` directory after the database has been migrated:
+
+```powershell
+$env:ADMIN_FIRST_NAME = Read-Host "Administrator first name"
+$env:ADMIN_LAST_NAME = Read-Host "Administrator last name"
+$env:ADMIN_EMAIL = Read-Host "Administrator email"
+$securePassword = Read-Host "Administrator password (12+ characters)" -AsSecureString
+$env:ADMIN_PASSWORD = [System.Net.NetworkCredential]::new("", $securePassword).Password
+npm run admin:bootstrap
+Remove-Item Env:ADMIN_FIRST_NAME, Env:ADMIN_LAST_NAME, Env:ADMIN_EMAIL, Env:ADMIN_PASSWORD
+```
+
+Provide `DATABASE_URL` through the backend `.env` file or process environment. The bootstrap command only creates an account; it does not reset or seed data. It obtains a PostgreSQL transaction-scoped advisory lock before checking for an existing admin, so simultaneous attempts serialize and only the first can succeed. If an administrator already exists, use the protected API endpoint instead.
+
+For API startup, configure `JWT_SECRET` in the backend environment with at least 32 random bytes. Generate one in PowerShell without printing it:
+
+```powershell
+$random = [Security.Cryptography.RandomNumberGenerator]::Create()
+$bytes = New-Object byte[] 48
+$random.GetBytes($bytes)
+$env:JWT_SECRET = [Convert]::ToBase64String($bytes)
+$random.Dispose()
+```
+
+Persist the generated value in your local secret store or untracked environment file for subsequent application starts. Docker Compose also requires `JWT_SECRET`. Seed code, seed data, and automatic seed commands are unchanged.

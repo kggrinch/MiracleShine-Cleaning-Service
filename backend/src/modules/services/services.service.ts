@@ -8,21 +8,35 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
   Min,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { isPrismaUniqueConstraintError } from '../../prisma/prisma-errors.js';
+
+type ServiceWhere = {
+  category?: CreateServiceDto['category'];
+  isActive?: boolean;
+  OR?: Array<
+    | { name: { contains: string; mode: 'insensitive' } }
+    | { description: { contains: string; mode: 'insensitive' } }
+  >;
+};
 
 export class CreateServiceDto {
   @IsString()
   @MinLength(2)
+  @MaxLength(150)
   name!: string;
 
   @IsString()
   @MinLength(10)
+  @MaxLength(5000)
   description!: string;
 
   @IsEnum(['RESIDENTIAL', 'COMMERCIAL', 'SPECIALTY'])
@@ -30,17 +44,19 @@ export class CreateServiceDto {
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
   startingPrice?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
   @Min(1)
   estimatedDurationMinutes?: number;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2048)
   imageUrl?: string;
 
   @IsOptional()
@@ -54,23 +70,40 @@ export class UpdateServiceDto extends PartialType(CreateServiceDto) {}
 export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters?: { category?: string; search?: string; isActive?: string }) {
-    const where: Record<string, any> = {};
+  async findAll(filters?: {
+    category?: string;
+    search?: string;
+    isActive?: string;
+  }) {
+    const where: ServiceWhere = {};
 
     if (filters?.category) {
-      where.category = filters.category.toUpperCase();
+      const category = filters.category.trim().toUpperCase();
+      if (
+        category !== 'RESIDENTIAL' &&
+        category !== 'COMMERCIAL' &&
+        category !== 'SPECIALTY'
+      ) {
+        throw new BadRequestException('Invalid service category.');
+      }
+      where.category = category;
     }
 
     if (filters?.isActive !== undefined) {
+      if (filters.isActive !== 'true' && filters.isActive !== 'false') {
+        throw new BadRequestException('isActive must be true or false.');
+      }
       where.isActive = filters.isActive === 'true';
     }
 
     if (filters?.search) {
       const term = filters.search.trim();
-      where.OR = [
-        { name: { contains: term, mode: 'insensitive' } },
-        { description: { contains: term, mode: 'insensitive' } },
-      ];
+      if (term) {
+        where.OR = [
+          { name: { contains: term, mode: 'insensitive' } },
+          { description: { contains: term, mode: 'insensitive' } },
+        ];
+      }
     }
 
     return this.prisma.service.findMany({
@@ -79,9 +112,9 @@ export class ServicesService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, includeInactive = false) {
     const service = await this.prisma.service.findUnique({ where: { id } });
-    if (!service) {
+    if (!service || (!includeInactive && !service.isActive)) {
       throw new NotFoundException('Service not found.');
     }
 
@@ -94,7 +127,9 @@ export class ServicesService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const match = services.find((service) => this.slugify(service.name) === slug);
+    const match = services.find(
+      (service) => this.slugify(service.name) === slug,
+    );
     if (!match) {
       throw new NotFoundException('Service not found.');
     }
@@ -112,17 +147,27 @@ export class ServicesService {
       throw new BadRequestException('A service with that name already exists.');
     }
 
-    return this.prisma.service.create({
-      data: {
-        name,
-        description: dto.description.trim(),
-        category: dto.category,
-        startingPrice: dto.startingPrice !== undefined ? String(dto.startingPrice) : null,
-        estimatedDurationMinutes: dto.estimatedDurationMinutes ?? 60,
-        imageUrl: dto.imageUrl ?? null,
-        isActive: dto.isActive ?? true,
-      },
-    });
+    try {
+      return await this.prisma.service.create({
+        data: {
+          name,
+          description: dto.description.trim(),
+          category: dto.category,
+          startingPrice:
+            dto.startingPrice !== undefined ? String(dto.startingPrice) : null,
+          estimatedDurationMinutes: dto.estimatedDurationMinutes ?? 60,
+          imageUrl: dto.imageUrl ?? null,
+          isActive: dto.isActive ?? true,
+        },
+      });
+    } catch (error) {
+      if (isPrismaUniqueConstraintError(error)) {
+        throw new BadRequestException(
+          'A service with that name already exists.',
+        );
+      }
+      throw error;
+    }
   }
 
   async update(id: string, dto: UpdateServiceDto) {
@@ -136,23 +181,36 @@ export class ServicesService {
         where: { name: dto.name.trim() },
       });
       if (duplicate) {
-        throw new BadRequestException('A service with that name already exists.');
+        throw new BadRequestException(
+          'A service with that name already exists.',
+        );
       }
     }
 
-    return this.prisma.service.update({
-      where: { id },
-      data: {
-        name: dto.name?.trim(),
-        description: dto.description?.trim(),
-        category: dto.category,
-        startingPrice:
-          dto.startingPrice === undefined ? undefined : String(dto.startingPrice),
-        estimatedDurationMinutes: dto.estimatedDurationMinutes,
-        imageUrl: dto.imageUrl,
-        isActive: dto.isActive,
-      },
-    });
+    try {
+      return await this.prisma.service.update({
+        where: { id },
+        data: {
+          name: dto.name?.trim(),
+          description: dto.description?.trim(),
+          category: dto.category,
+          startingPrice:
+            dto.startingPrice === undefined
+              ? undefined
+              : String(dto.startingPrice),
+          estimatedDurationMinutes: dto.estimatedDurationMinutes,
+          imageUrl: dto.imageUrl,
+          isActive: dto.isActive,
+        },
+      });
+    } catch (error) {
+      if (isPrismaUniqueConstraintError(error)) {
+        throw new BadRequestException(
+          'A service with that name already exists.',
+        );
+      }
+      throw error;
+    }
   }
 
   async remove(id: string) {
@@ -173,7 +231,8 @@ export class ServicesService {
       });
 
       return {
-        message: 'Service deactivated instead of deleted because quote history references it.',
+        message:
+          'Service deactivated instead of deleted because quote history references it.',
         id,
       };
     }
@@ -183,7 +242,13 @@ export class ServicesService {
   }
 
   async resetDefaults() {
-    const defaults = [
+    const defaults: Array<{
+      name: string;
+      description: string;
+      category: CreateServiceDto['category'];
+      startingPrice: string | null;
+      estimatedDurationMinutes: number;
+    }> = [
       {
         name: 'Residential Cleaning',
         description: 'Routine cleaning for houses and apartments.',
@@ -255,7 +320,7 @@ export class ServicesService {
           where: { name: service.name },
           update: {
             description: service.description,
-            category: service.category as any,
+            category: service.category,
             startingPrice: service.startingPrice,
             estimatedDurationMinutes: service.estimatedDurationMinutes,
             isActive: true,
@@ -263,7 +328,7 @@ export class ServicesService {
           create: {
             name: service.name,
             description: service.description,
-            category: service.category as any,
+            category: service.category,
             startingPrice: service.startingPrice,
             estimatedDurationMinutes: service.estimatedDurationMinutes,
             isActive: true,
@@ -275,7 +340,9 @@ export class ServicesService {
     return results.map((service) => this.withSlug(service));
   }
 
-  private withSlug(service: Record<string, any>) {
+  private withSlug<T extends { name: string }>(
+    service: T,
+  ): T & { slug: string } {
     return {
       ...service,
       slug: this.slugify(service.name),

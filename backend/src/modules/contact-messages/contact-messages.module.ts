@@ -4,8 +4,10 @@ import {
   ContactMessagesController,
 } from './contact-messages.controller.js';
 import { ContactMessagesService } from './contact-messages.service.js';
+import { AuthModule } from '../auth/auth.module.js';
 
 @Module({
+  imports: [AuthModule],
   controllers: [ContactMessagesController, AdminContactMessagesController],
   providers: [ContactMessagesService],
 })

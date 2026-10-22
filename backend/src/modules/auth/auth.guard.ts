@@ -12,7 +12,9 @@ export class AuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<Request & { user?: unknown }>();
+    const req = context
+      .switchToHttp()
+      .getRequest<Request & { user?: unknown }>();
     const token = this.extractToken(req);
     const user = await this.authService.resolveUser(token);
 
@@ -26,17 +28,11 @@ export class AuthGuard implements CanActivate {
 
   private extractToken(req: Request): string | undefined {
     const authorization = req.headers.authorization;
-    if (typeof authorization === 'string' && authorization.startsWith('Bearer ')) {
+    if (
+      typeof authorization === 'string' &&
+      /^Bearer\s+/i.test(authorization)
+    ) {
       return authorization.replace(/^Bearer\s+/i, '');
-    }
-
-    const fallback = req.headers['x-user-token'];
-    if (typeof fallback === 'string') {
-      return fallback;
-    }
-
-    if (Array.isArray(fallback) && fallback.length > 0) {
-      return fallback[0];
     }
 
     return undefined;

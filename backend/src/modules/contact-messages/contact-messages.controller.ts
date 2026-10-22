@@ -5,7 +5,14 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import type { Request } from 'express';
+import { AuthGuard } from '../auth/auth.guard.js';
+import { OptionalAuthGuard } from '../auth/optional-auth.guard.js';
+import { RequireRoles } from '../auth/roles.decorator.js';
+import { RolesGuard } from '../auth/roles.guard.js';
 import {
   ContactMessagesService,
   CreateContactMessageDto,
@@ -14,14 +21,22 @@ import {
 
 @Controller('contact-messages')
 export class ContactMessagesController {
-  constructor(private readonly contactMessagesService: ContactMessagesService) {}
+  constructor(
+    private readonly contactMessagesService: ContactMessagesService,
+  ) {}
 
   @Post()
-  create(@Body() dto: CreateContactMessageDto) {
-    return this.contactMessagesService.create(dto);
+  @UseGuards(OptionalAuthGuard)
+  create(
+    @Req() req: Request & { user?: { id: string } },
+    @Body() dto: CreateContactMessageDto,
+  ) {
+    return this.contactMessagesService.create(dto, req.user?.id);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @RequireRoles('ADMIN')
   findOne(@Param('id') id: string) {
     return this.contactMessagesService.findOne(id);
   }
@@ -29,15 +44,24 @@ export class ContactMessagesController {
 
 @Controller('admin')
 export class AdminContactMessagesController {
-  constructor(private readonly contactMessagesService: ContactMessagesService) {}
+  constructor(
+    private readonly contactMessagesService: ContactMessagesService,
+  ) {}
 
   @Get('contact-messages')
+  @UseGuards(AuthGuard, RolesGuard)
+  @RequireRoles('ADMIN')
   listAll() {
     return this.contactMessagesService.findAll();
   }
 
   @Patch('contact-messages/:id/status')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateContactMessageStatusDto) {
+  @UseGuards(AuthGuard, RolesGuard)
+  @RequireRoles('ADMIN')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateContactMessageStatusDto,
+  ) {
     return this.contactMessagesService.updateStatus(id, dto);
   }
 }

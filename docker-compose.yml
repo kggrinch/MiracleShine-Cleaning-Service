@@ -30,9 +30,10 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       PORT: ${BACKEND_PORT:-3000}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set to a random secret of at least 32 bytes}
     command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm run start:prod"
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
 
   frontend:
     build:
@@ -43,7 +44,7 @@ services:
     env_file:
       - .env
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3000}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${BACKEND_PORT:-3000}}
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     volumes:
