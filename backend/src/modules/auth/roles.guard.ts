@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 export const ROLES_KEY = 'roles';
 
 @Injectable()
+/** Enforce role metadata after authentication has populated the request user. */
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 

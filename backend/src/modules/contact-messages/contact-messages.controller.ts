@@ -25,6 +25,7 @@ export class ContactMessagesController {
     private readonly contactMessagesService: ContactMessagesService,
   ) {}
 
+  /** POST /api/v1/contact-messages — submit a contact message with optional bearer authentication. */
   @Post()
   @UseGuards(OptionalAuthGuard)
   create(
@@ -34,6 +35,7 @@ export class ContactMessagesController {
     return this.contactMessagesService.create(dto, req.user?.id);
   }
 
+  /** GET /api/v1/contact-messages/:id — fetch one message; admin bearer token required. */
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')
@@ -48,6 +50,7 @@ export class AdminContactMessagesController {
     private readonly contactMessagesService: ContactMessagesService,
   ) {}
 
+  /** GET /api/v1/admin/contact-messages — list all messages; admin bearer token required. */
   @Get('contact-messages')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')
@@ -55,6 +58,7 @@ export class AdminContactMessagesController {
     return this.contactMessagesService.findAll();
   }
 
+  /** PATCH /api/v1/admin/contact-messages/:id/status — update message status; admin bearer token required. */
   @Patch('contact-messages/:id/status')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')

@@ -18,6 +18,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { isPrismaUniqueConstraintError } from '../../prisma/prisma-errors.js';
 
+/** Review content is tied to a completed appointment and rated from one to five. */
 export class CreateReviewDto {
   @IsUUID()
   appointmentId!: string;
@@ -41,9 +42,11 @@ export class UpdateReviewStatusDto {
 export class UpdateReviewDto extends PartialType(CreateReviewDto) {}
 
 @Injectable()
+/** Manage review submission and moderation; only approved reviews are public. */
 export class ReviewsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Return only approved reviews for display on public pages. */
   async findPublicReviews() {
     return this.prisma.review.findMany({
       where: { status: 'APPROVED' },
@@ -56,6 +59,7 @@ export class ReviewsService {
     });
   }
 
+  /** Return every review, including pending and rejected entries, for moderation. */
   async findAllAdmin() {
     return this.prisma.review.findMany({
       orderBy: { createdAt: 'desc' },
@@ -67,6 +71,7 @@ export class ReviewsService {
     });
   }
 
+  /** Verify ownership and completion, then create a pending review for moderation. */
   async create(dto: CreateReviewDto, userId: string) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id: dto.appointmentId },
@@ -84,6 +89,7 @@ export class ReviewsService {
     if (appointment.quoteRequest.userId !== userId) {
       throw new NotFoundException('Appointment not found.');
     }
+    // Require completed work before a customer can provide a review.
     if (appointment.status !== 'COMPLETED') {
       throw new BadRequestException(
         'Reviews can only be submitted for completed appointments.',
@@ -124,6 +130,7 @@ export class ReviewsService {
     }
   }
 
+  /** Change an existing review's moderation status. */
   async updateStatus(id: string, dto: UpdateReviewStatusDto) {
     const review = await this.prisma.review.findUnique({ where: { id } });
     if (!review) {

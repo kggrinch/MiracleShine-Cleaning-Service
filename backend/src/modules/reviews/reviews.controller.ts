@@ -22,11 +22,13 @@ import {
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  /** GET /api/v1/reviews — list approved public reviews; no authentication is required. */
   @Get()
   findPublic() {
     return this.reviewsService.findPublicReviews();
   }
 
+  /** POST /api/v1/reviews — submit a review for the caller's completed appointment. */
   @Post()
   @UseGuards(AuthGuard)
   create(
@@ -41,6 +43,7 @@ export class ReviewsController {
 export class AdminReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  /** GET /api/v1/admin/reviews — list all reviews for moderation; admin bearer token required. */
   @Get('reviews')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')
@@ -48,6 +51,7 @@ export class AdminReviewsController {
     return this.reviewsService.findAllAdmin();
   }
 
+  /** PATCH /api/v1/admin/reviews/:id/status — approve or reject a review; admin only. */
   @Patch('reviews/:id/status')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')

@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
+/** Contact form fields accepted from anonymous or signed-in visitors. */
 export class CreateContactMessageDto {
   @IsString()
   @MinLength(2)
@@ -40,9 +41,11 @@ export class UpdateContactMessageDto extends PartialType(
 ) {}
 
 @Injectable()
+/** Store contact submissions and provide admin review/status operations. */
 export class ContactMessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Normalize and store a visitor's submission, linking an account when available. */
   async create(dto: CreateContactMessageDto, userId?: string) {
     const message = await this.prisma.contactMessage.create({
       data: {
@@ -59,6 +62,7 @@ export class ContactMessagesService {
     return message;
   }
 
+  /** List all submissions newest-first, including limited account details. */
   async findAll() {
     return this.prisma.contactMessage.findMany({
       orderBy: { createdAt: 'desc' },
@@ -79,6 +83,7 @@ export class ContactMessagesService {
     });
   }
 
+  /** Fetch one submission for administrator review or report it as not found. */
   async findOne(id: string) {
     const message = await this.prisma.contactMessage.findUnique({
       where: { id },
@@ -105,6 +110,7 @@ export class ContactMessagesService {
     return message;
   }
 
+  /** Update an existing message's handling status and return its linked user. */
   async updateStatus(id: string, dto: UpdateContactMessageStatusDto) {
     const message = await this.prisma.contactMessage.findUnique({
       where: { id },

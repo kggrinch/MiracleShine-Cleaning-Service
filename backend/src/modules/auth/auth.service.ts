@@ -19,6 +19,7 @@ import { isPrismaUniqueConstraintError } from '../../prisma/prisma-errors.js';
 
 const TOKEN_LIFETIME_SECONDS = 60 * 60;
 
+/** Registration payload; the public flow always assigns the customer role. */
 export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
@@ -44,6 +45,7 @@ export class RegisterUserDto {
   phone?: string;
 }
 
+/** Login payload checked against the stored password hash. */
 export class LoginDto {
   @IsEmail()
   email!: string;
@@ -94,6 +96,7 @@ export class AuthService {
     this.jwtSecret = Buffer.from(secret, 'utf8');
   }
 
+  /** Issue a one-hour HS256 JWT using the configured server-only secret. */
   issueToken(userId: string): string {
     const now = Math.floor(Date.now() / 1000);
     const header = Buffer.from(
@@ -111,6 +114,7 @@ export class AuthService {
     return `${unsignedToken}.${this.sign(unsignedToken)}`;
   }
 
+  /** Normalize account details, hash the password, and persist a customer. */
   async register(
     data: RegisterUserDto,
   ): Promise<{ token: string; user: SafeUser }> {
@@ -152,6 +156,7 @@ export class AuthService {
     }
   }
 
+  /** Check an active account's password and return its token and safe profile. */
   async login(data: LoginDto): Promise<{ token: string; user: SafeUser }> {
     const normalizedEmail = data.email.trim().toLowerCase();
     const user = await this.prisma.user.findUnique({
@@ -176,6 +181,7 @@ export class AuthService {
     };
   }
 
+  /** Verify the token, then reload its user so deactivated accounts lose access. */
   async resolveUser(
     token: string | undefined,
   ): Promise<AuthenticatedUser | null> {
@@ -196,6 +202,7 @@ export class AuthService {
     return user?.isActive ? user : null;
   }
 
+  /** Load the current user's public profile without selecting password data. */
   async getProfile(userId: string): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -218,6 +225,7 @@ export class AuthService {
     return user;
   }
 
+  /** Remove the password hash before a user record is sent to an API caller. */
   safeUser(user: UserRecord): SafeUser {
     return {
       id: user.id,
@@ -232,6 +240,7 @@ export class AuthService {
     };
   }
 
+  /** Validate token shape, signature, algorithm, and expiration claims. */
   private verifyToken(token: string): TokenClaims | null {
     const parts = token.split('.');
     if (
@@ -255,6 +264,8 @@ export class AuthService {
       return null;
     }
 
+    // Decode only after signature verification, then enforce the expected
+    // algorithm and time claims before trusting the subject.
     try {
       const header: unknown = JSON.parse(
         Buffer.from(encodedHeader, 'base64url').toString('utf8'),
@@ -287,6 +298,7 @@ export class AuthService {
     }
   }
 
+  /** Produce the base64url HMAC signature used by issueToken and verifyToken. */
   private sign(value: string): string {
     return createHmac('sha256', this.jwtSecret)
       .update(value)

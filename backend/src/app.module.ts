@@ -11,6 +11,7 @@ import { AppointmentsModule } from './modules/appointments/appointments.module.j
 import { ContactMessagesModule } from './modules/contact-messages/contact-messages.module.js';
 import { ReviewsModule } from './modules/reviews/reviews.module.js';
 
+/** Root composition point for configuration, persistence, and feature modules. */
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

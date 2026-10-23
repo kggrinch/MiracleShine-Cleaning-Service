@@ -16,6 +16,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { isPrismaUniqueConstraintError } from '../../prisma/prisma-errors.js';
 
+/** DTO for the protected endpoint that provisions additional administrators. */
 export class CreateAdminDto {
   @IsString()
   @IsNotEmpty()
@@ -40,6 +41,7 @@ export class CreateAdminDto {
   password!: string;
 }
 
+/** Editable fields accepted when a customer updates their own profile. */
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
@@ -59,9 +61,11 @@ export class UpdateUserDto {
 }
 
 @Injectable()
+/** Persist user profiles and prevent password hashes from leaving the service. */
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Look up the authenticated account and return only fields safe for clients. */
   async findMe(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -74,12 +78,14 @@ export class UsersService {
     return this.safeUser(user);
   }
 
+  /** Update supplied profile fields after normalizing and checking email uniqueness. */
   async updateMe(userId: string, dto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
+    // Normalize email consistently with registration and login before uniqueness checks.
     const normalizedEmail = dto.email?.trim().toLowerCase();
     if (normalizedEmail && normalizedEmail !== user.email) {
       const existingUser = await this.prisma.user.findUnique({
@@ -110,6 +116,7 @@ export class UsersService {
     }
   }
 
+  /** Return newest-first user records with password hashes removed. */
   async findAll() {
     return (
       await this.prisma.user.findMany({
@@ -118,6 +125,7 @@ export class UsersService {
     ).map((user) => this.safeUser(user));
   }
 
+  /** Look up a user by ID and omit their password hash. */
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
@@ -127,6 +135,7 @@ export class UsersService {
     return this.safeUser(user);
   }
 
+  /** Create an admin account after duplicate checking and password hashing. */
   async createAdmin(dto: CreateAdminDto) {
     const email = dto.email.trim().toLowerCase();
     const existingUser = await this.prisma.user.findUnique({
@@ -158,6 +167,7 @@ export class UsersService {
     }
   }
 
+  /** Strip passwordHash generically while preserving the remaining record type. */
   safeUser<T extends { passwordHash: string }>(
     user: T,
   ): Omit<T, 'passwordHash'> {

@@ -4,9 +4,11 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import compression from 'compression';
 
+/** Build the HTTP application, apply shared middleware, then begin listening. */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Keep every feature route under one versioned API prefix.
   app.setGlobalPrefix('api/v1');
 
   // Enable CORS so browser clients can call this API from allowed origins.
@@ -29,4 +31,5 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();

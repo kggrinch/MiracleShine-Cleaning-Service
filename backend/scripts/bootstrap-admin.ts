@@ -6,6 +6,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { CreateAdminDto } from '../src/modules/users/users.service.js';
 import { bootstrapFirstAdmin } from '../src/modules/users/admin-bootstrap.js';
 
+/** Validate the environment-provided first-admin details and create the account. */
 async function main() {
   const databaseUrl = process.env.DATABASE_URL;
   const firstName = process.env.ADMIN_FIRST_NAME;

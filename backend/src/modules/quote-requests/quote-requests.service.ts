@@ -23,6 +23,7 @@ import {
 } from 'class-validator';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
+/** Validated customer and property details submitted for a cleaning estimate. */
 export class CreateQuoteRequestDto {
   @IsOptional()
   @IsUUID()
@@ -124,9 +125,11 @@ export class UpdateQuoteStatusDto {
 export class UpdateQuoteRequestDto extends PartialType(CreateQuoteRequestDto) {}
 
 @Injectable()
+/** Handle quote creation, ownership checks, and allowed lifecycle transitions. */
 export class QuoteRequestsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** List a customer's quotes newest-first, with the associated service. */
   async findCustomerQuotes(userId: string) {
     return this.prisma.quoteRequest.findMany({
       where: { userId },
@@ -135,6 +138,7 @@ export class QuoteRequestsService {
     });
   }
 
+  /** Fetch a quote only for its owner unless the caller is an administrator. */
   async findOne(id: string, userId?: string, admin = false) {
     const quote = await this.prisma.quoteRequest.findUnique({
       where: { id },
@@ -152,6 +156,7 @@ export class QuoteRequestsService {
     return quote;
   }
 
+  /** Resolve an active service and persist a normalized guest or account quote. */
   async create(dto: CreateQuoteRequestDto, userId?: string) {
     const service = await this.resolveService(dto);
     const preferredDate = dto.preferredDate
@@ -192,6 +197,7 @@ export class QuoteRequestsService {
     });
   }
 
+  /** Mark a cancellable quote declined, using a guarded update against stale state. */
   async cancel(id: string, userId?: string, admin = false) {
     const quote = await this.prisma.quoteRequest.findUnique({ where: { id } });
     if (!quote) {
@@ -208,6 +214,8 @@ export class QuoteRequestsService {
       );
     }
 
+    // Compare the previously read status in the update to avoid overwriting a
+    // concurrent transition performed by another request.
     const result = await this.prisma.quoteRequest.updateMany({
       where: { id, status: quote.status },
       data: { status: 'DECLINED' },
@@ -223,6 +231,7 @@ export class QuoteRequestsService {
     });
   }
 
+  /** Enforce ownership/admin permissions and the defined quote-state transition graph. */
   async updateStatus(
     id: string,
     dto: UpdateQuoteStatusDto,
@@ -238,6 +247,8 @@ export class QuoteRequestsService {
       throw new NotFoundException('Quote request not found.');
     }
 
+    // Keep allowed lifecycle transitions explicit instead of accepting any
+    // enum value as a valid next state.
     const allowedTransitions: Record<string, string[]> = {
       PENDING: ['CONTACTED', 'QUOTED', 'DECLINED', 'ACCEPTED', 'COMPLETED'],
       CONTACTED: ['QUOTED', 'DECLINED', 'ACCEPTED', 'COMPLETED'],
@@ -276,6 +287,7 @@ export class QuoteRequestsService {
     });
   }
 
+  /** Search quotes for administrators by status, customer email, or service. */
   async findAllAdmin(filters?: {
     status?: string;
     email?: string;
@@ -319,6 +331,7 @@ export class QuoteRequestsService {
     });
   }
 
+  /** Resolve either an active service ID or an active service name from the request. */
   private async resolveService(dto: CreateQuoteRequestDto) {
     if (dto.serviceId) {
       const service = await this.prisma.service.findUnique({

@@ -12,6 +12,7 @@ datasource db {
 // ENUMS
 // ============================================================
 
+/// Access role used by authentication and administrator-only routes.
 enum UserRole {
   CUSTOMER
   ADMIN
@@ -19,6 +20,7 @@ enum UserRole {
   @@map("user_role")
 }
 
+/// Broad catalog grouping used for service browsing and filtering.
 enum ServiceCategory {
   RESIDENTIAL
   COMMERCIAL
@@ -27,6 +29,7 @@ enum ServiceCategory {
   @@map("service_category")
 }
 
+/// Kind of property being described by a quote request.
 enum PropertyType {
   HOUSE
   APARTMENT
@@ -36,6 +39,7 @@ enum PropertyType {
   @@map("property_type")
 }
 
+/// Quote lifecycle states; allowed transitions are enforced by the service layer.
 enum QuoteStatus {
   PENDING
   CONTACTED
@@ -47,6 +51,7 @@ enum QuoteStatus {
   @@map("quote_status")
 }
 
+/// Appointment lifecycle states; allowed transitions are enforced by the service layer.
 enum AppointmentStatus {
   REQUESTED
   CONFIRMED
@@ -56,6 +61,7 @@ enum AppointmentStatus {
   @@map("appointment_status")
 }
 
+/// Administrative handling state for a submitted contact message.
 enum ContactMessageStatus {
   NEW
   READ
@@ -65,6 +71,7 @@ enum ContactMessageStatus {
   @@map("contact_message_status")
 }
 
+/// Moderation state determining whether a review is publicly visible.
 enum ReviewStatus {
   PENDING
   APPROVED
@@ -77,6 +84,7 @@ enum ReviewStatus {
 // USERS
 // ============================================================
 
+/// Customer and administrator identities; passwordHash is never returned by API services.
 model User {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   firstName    String   @map("first_name") @db.VarChar(100)
@@ -100,6 +108,7 @@ model User {
 // SERVICES
 // ============================================================
 
+/// Cleaning catalog entry; referenced services are deactivated rather than removed.
 model Service {
   id                       String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                     String          @unique @db.VarChar(150)
@@ -122,6 +131,7 @@ model Service {
 // QUOTE REQUESTS
 // ============================================================
 
+/// Customer or guest request for a cleaning estimate and optional appointment.
 model QuoteRequest {
   id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String? @map("user_id") @db.Uuid
@@ -165,6 +175,7 @@ model QuoteRequest {
 // APPOINTMENTS
 // ============================================================
 
+/// Scheduled work associated with exactly one quote request.
 model Appointment {
   id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quoteRequestId String @unique @map("quote_request_id") @db.Uuid
@@ -190,6 +201,7 @@ model Appointment {
 // CONTACT MESSAGES
 // ============================================================
 
+/// Website contact-form submission, optionally linked to a registered user.
 model ContactMessage {
   id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId   String? @map("user_id") @db.Uuid
@@ -215,6 +227,7 @@ model ContactMessage {
 // REVIEWS
 // ============================================================
 
+/// One moderation-controlled review per appointment.
 model Review {
   id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   appointmentId String @unique @map("appointment_id") @db.Uuid

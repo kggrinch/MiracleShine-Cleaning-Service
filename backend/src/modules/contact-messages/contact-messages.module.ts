@@ -6,6 +6,7 @@ import {
 import { ContactMessagesService } from './contact-messages.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 
+/** Register public contact submission and admin message-management routes. */
 @Module({
   imports: [AuthModule],
   controllers: [ContactMessagesController, AdminContactMessagesController],

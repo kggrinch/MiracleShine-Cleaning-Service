@@ -6,6 +6,7 @@ import {
 import { QuoteRequestsService } from './quote-requests.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 
+/** Register customer quote workflows and protected administrator workflows. */
 @Module({
   imports: [AuthModule],
   controllers: [QuoteRequestsController, AdminQuoteRequestsController],

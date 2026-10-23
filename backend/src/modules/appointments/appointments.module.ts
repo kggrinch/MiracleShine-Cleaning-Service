@@ -6,6 +6,7 @@ import {
 import { AppointmentsService } from './appointments.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 
+/** Register customer appointment and administrator scheduling routes. */
 @Module({
   imports: [AuthModule],
   controllers: [AppointmentsController, AdminAppointmentsController],

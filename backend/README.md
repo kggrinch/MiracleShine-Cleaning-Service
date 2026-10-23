@@ -227,6 +227,230 @@ The backend uses the following enums:
 - Each `Appointment` can have at most one `Review`.
 - `Service` records are deactivated instead of hard-deleted when historical records depend on them.
 
+### Entity-relationship diagram
+
+The diagram shows the database relationships and their optionality. A quote
+request may be submitted by a guest (`user_id` is null), but it must refer to a
+service. An appointment and review are optional follow-up records, each limited
+to one per parent record by a unique foreign key.
+
+```mermaid
+erDiagram
+    USERS o|--o{ QUOTE_REQUESTS : submits
+    SERVICES ||--o{ QUOTE_REQUESTS : selected_for
+    QUOTE_REQUESTS ||--o| APPOINTMENTS : schedules
+    APPOINTMENTS ||--o| REVIEWS : receives
+    USERS o|--o{ CONTACT_MESSAGES : sends
+
+    USERS {
+        uuid id PK
+        varchar first_name
+        varchar last_name
+        varchar email UK
+        varchar password_hash
+        varchar phone
+        user_role role
+        boolean is_active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    SERVICES {
+        uuid id PK
+        varchar name UK
+        text description
+        service_category category
+        decimal starting_price
+        integer estimated_duration_minutes
+        varchar image_url
+        boolean is_active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    QUOTE_REQUESTS {
+        uuid id PK
+        uuid user_id FK
+        uuid service_id FK
+        varchar customer_first_name
+        varchar customer_last_name
+        varchar customer_email
+        varchar customer_phone
+        property_type property_type
+        integer square_footage
+        integer bedrooms
+        decimal bathrooms
+        varchar street_address
+        varchar city
+        varchar state
+        varchar postal_code
+        date preferred_date
+        time preferred_time
+        text notes
+        quote_status status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    APPOINTMENTS {
+        uuid id PK
+        uuid quote_request_id FK, UK
+        date scheduled_date
+        time start_time
+        time end_time
+        appointment_status status
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    CONTACT_MESSAGES {
+        uuid id PK
+        uuid user_id FK
+        varchar customer_name
+        varchar email
+        varchar phone
+        varchar subject
+        text message
+        contact_message_status status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    REVIEWS {
+        uuid id PK
+        uuid appointment_id FK, UK
+        integer rating
+        text comment
+        review_status status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+```
+
+### Relational schema diagram
+
+This table-oriented view highlights primary keys, unique keys, and foreign-key
+columns. Arrows point from the referenced parent key to the child foreign key.
+
+```mermaid
+flowchart LR
+    USERS["users<br/>PK id<br/>UQ email"]
+    SERVICES["services<br/>PK id<br/>UQ name"]
+    QUOTES["quote_requests<br/>PK id<br/>FK user_id (nullable)<br/>FK service_id"]
+    APPOINTMENTS["appointments<br/>PK id<br/>UQ, FK quote_request_id"]
+    CONTACTS["contact_messages<br/>PK id<br/>FK user_id (nullable)"]
+    REVIEWS["reviews<br/>PK id<br/>UQ, FK appointment_id"]
+
+    USERS -->|"user_id"| QUOTES
+    SERVICES -->|"service_id"| QUOTES
+    QUOTES -->|"unique quote_request_id"| APPOINTMENTS
+    APPOINTMENTS -->|"unique appointment_id"| REVIEWS
+    USERS -->|"user_id"| CONTACTS
+```
+
+### Relational schema
+
+`PK` denotes a primary key, `FK` a foreign key, `UQ` a unique constraint, and
+`NULL` a nullable column. The table and column names below reflect the mapped
+PostgreSQL names in `prisma/schema.prisma`.
+
+```text
+users(
+  id UUID PK,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL UQ,
+  password_hash VARCHAR(255) NOT NULL,
+  phone VARCHAR(30) NULL,
+  role user_role NOT NULL DEFAULT 'CUSTOMER',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ(6) NOT NULL,
+  updated_at TIMESTAMPTZ(6) NOT NULL
+)
+
+services(
+  id UUID PK,
+  name VARCHAR(150) NOT NULL UQ,
+  description TEXT NOT NULL,
+  category service_category NOT NULL,
+  starting_price DECIMAL(10,2) NULL,
+  estimated_duration_minutes INTEGER NOT NULL,
+  image_url VARCHAR(2048) NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ(6) NOT NULL,
+  updated_at TIMESTAMPTZ(6) NOT NULL
+)
+
+quote_requests(
+  id UUID PK,
+  user_id UUID NULL FK -> users.id,
+  service_id UUID NOT NULL FK -> services.id,
+  customer_first_name VARCHAR(100) NOT NULL,
+  customer_last_name VARCHAR(100) NOT NULL,
+  customer_email VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(30) NULL,
+  property_type property_type NOT NULL,
+  square_footage INTEGER NULL,
+  bedrooms INTEGER NULL,
+  bathrooms DECIMAL(4,1) NULL,
+  street_address VARCHAR(255) NOT NULL,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(100) NOT NULL,
+  postal_code VARCHAR(20) NOT NULL,
+  preferred_date DATE NULL,
+  preferred_time TIME(6) NULL,
+  notes TEXT NULL,
+  status quote_status NOT NULL DEFAULT 'PENDING',
+  created_at TIMESTAMPTZ(6) NOT NULL,
+  updated_at TIMESTAMPTZ(6) NOT NULL
+)
+
+appointments(
+  id UUID PK,
+  quote_request_id UUID NOT NULL UQ FK -> quote_requests.id,
+  scheduled_date DATE NOT NULL,
+  start_time TIME(6) NOT NULL,
+  end_time TIME(6) NOT NULL,
+  status appointment_status NOT NULL DEFAULT 'REQUESTED',
+  notes TEXT NULL,
+  created_at TIMESTAMPTZ(6) NOT NULL,
+  updated_at TIMESTAMPTZ(6) NOT NULL
+)
+
+contact_messages(
+  id UUID PK,
+  user_id UUID NULL FK -> users.id,
+  customer_name VARCHAR(200) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(30) NULL,
+  subject VARCHAR(200) NOT NULL,
+  message TEXT NOT NULL,
+  status contact_message_status NOT NULL DEFAULT 'NEW',
+  created_at TIMESTAMPTZ(6) NOT NULL,
+  updated_at TIMESTAMPTZ(6) NOT NULL
+)
+
+reviews(
+  id UUID PK,
+  appointment_id UUID NOT NULL UQ FK -> appointments.id,
+  rating INTEGER NOT NULL,
+  comment TEXT NULL,
+  status review_status NOT NULL DEFAULT 'PENDING',
+  created_at TIMESTAMPTZ(6) NOT NULL,
+  updated_at TIMESTAMPTZ(6) NOT NULL
+)
+```
+
+Foreign-key deletion behavior preserves history: deleting a user sets
+`quote_requests.user_id` and `contact_messages.user_id` to `NULL`; deleting a
+service referenced by a quote or a quote with an appointment, or an appointment
+with a review, is restricted. The service layer deactivates referenced services
+instead of deleting them. The seed creates both account-owned and guest
+submissions, sample catalog entries, appointments, contact messages, and one
+approved review; the diagram represents the full schema rather than only those
+sample rows.
+
 ## 6. Authentication and authorization
 
 ### Current auth model
@@ -306,6 +530,10 @@ Returns the same token + safe user payload as registration.
 Requires the auth guard. Returns the currently authenticated user profile with password excluded.
 
 ## 7. API reference
+
+Route handlers in `src/` include comments with the full mounted URI, HTTP method,
+and authentication requirements. The `/api/v1` prefix shown here is configured
+once in `src/main.ts`; feature controllers define only the route suffixes.
 
 ### 7.1 Global endpoints
 

@@ -28,6 +28,7 @@ type ServiceWhere = {
   >;
 };
 
+/** Validated input for creating a catalog service. */
 export class CreateServiceDto {
   @IsString()
   @MinLength(2)
@@ -67,9 +68,11 @@ export class CreateServiceDto {
 export class UpdateServiceDto extends PartialType(CreateServiceDto) {}
 
 @Injectable()
+/** Read and maintain the catalog while preserving referenced service history. */
 export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Query the catalog using validated category, active-state, and text filters. */
   async findAll(filters?: {
     category?: string;
     search?: string;
@@ -112,6 +115,7 @@ export class ServicesService {
     });
   }
 
+  /** Fetch a service by ID, hiding inactive records from public callers. */
   async findOne(id: string, includeInactive = false) {
     const service = await this.prisma.service.findUnique({ where: { id } });
     if (!service || (!includeInactive && !service.isActive)) {
@@ -121,12 +125,15 @@ export class ServicesService {
     return this.withSlug(service);
   }
 
+  /** Find an active catalog entry by comparing its generated name slug. */
   async findBySlug(slug: string) {
     const services = await this.prisma.service.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
     });
 
+    // Slugs are derived from names, so resolve them consistently without
+    // introducing a second persisted identifier.
     const match = services.find(
       (service) => this.slugify(service.name) === slug,
     );
@@ -137,6 +144,7 @@ export class ServicesService {
     return this.withSlug(match);
   }
 
+  /** Create a service with normalized text and defaults for optional values. */
   async create(dto: CreateServiceDto) {
     const name = dto.name.trim();
     const existing = await this.prisma.service.findFirst({
@@ -170,6 +178,7 @@ export class ServicesService {
     }
   }
 
+  /** Apply only supplied fields after ensuring the service and its name are valid. */
   async update(id: string, dto: UpdateServiceDto) {
     const existing = await this.prisma.service.findUnique({ where: { id } });
     if (!existing) {
@@ -213,6 +222,7 @@ export class ServicesService {
     }
   }
 
+  /** Delete unreferenced services, but deactivate those used by quote history. */
   async remove(id: string) {
     const service = await this.prisma.service.findUnique({ where: { id } });
     if (!service) {
@@ -224,6 +234,7 @@ export class ServicesService {
       select: { id: true },
     });
 
+    // Keep referenced services available to historical quote records.
     if (quoteRequests.length > 0) {
       await this.prisma.service.update({
         where: { id },
@@ -241,7 +252,10 @@ export class ServicesService {
     return { deleted: true, id };
   }
 
+  /** Restore the canonical catalog by upserting each default service. */
   async resetDefaults() {
+    // Upsert defaults so this admin action is repeatable and restores edits
+    // to the baseline catalog without creating duplicate names.
     const defaults: Array<{
       name: string;
       description: string;
@@ -340,6 +354,7 @@ export class ServicesService {
     return results.map((service) => this.withSlug(service));
   }
 
+  /** Add a derived slug to a service response without persisting it. */
   private withSlug<T extends { name: string }>(
     service: T,
   ): T & { slug: string } {
@@ -349,6 +364,7 @@ export class ServicesService {
     };
   }
 
+  /** Convert a service name to a lowercase, URL-friendly identifier. */
   private slugify(value: string): string {
     return value
       .toLowerCase()

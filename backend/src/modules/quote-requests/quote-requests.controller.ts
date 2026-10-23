@@ -29,12 +29,14 @@ type AuthenticatedRequest = Request & {
 export class QuoteRequestsController {
   constructor(private readonly quoteRequestsService: QuoteRequestsService) {}
 
+  /** POST /api/v1/quote-requests — submit a quote request, optionally associating the signed-in user. */
   @Post()
   @UseGuards(OptionalAuthGuard)
   create(@Req() req: AuthenticatedRequest, @Body() dto: CreateQuoteRequestDto) {
     return this.quoteRequestsService.create(dto, req.user?.id);
   }
 
+  /** GET /api/v1/quote-requests/me — list quote requests belonging to the signed-in customer. */
   @Get('me')
   @UseGuards(AuthGuard)
   async getMine(@Req() req: AuthenticatedRequest) {
@@ -46,6 +48,7 @@ export class QuoteRequestsController {
     return this.quoteRequestsService.findCustomerQuotes(userId);
   }
 
+  /** GET /api/v1/quote-requests/:id — fetch an owned quote request, or any request as an admin. */
   @Get(':id')
   @UseGuards(AuthGuard)
   async getOne(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
@@ -57,6 +60,7 @@ export class QuoteRequestsController {
     );
   }
 
+  /** POST /api/v1/quote-requests/:id/cancel — cancel an owned quote request, or any request as an admin. */
   @Post(':id/cancel')
   @UseGuards(AuthGuard)
   async cancel(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
@@ -73,6 +77,7 @@ export class QuoteRequestsController {
 export class AdminQuoteRequestsController {
   constructor(private readonly quoteRequestsService: QuoteRequestsService) {}
 
+  /** GET /api/v1/admin/quote-requests?status=&email= — search quote requests; admin bearer token required. */
   @Get('quote-requests')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')
@@ -80,6 +85,7 @@ export class AdminQuoteRequestsController {
     return this.quoteRequestsService.findAllAdmin({ status, email });
   }
 
+  /** GET /api/v1/admin/quote-requests/:id — fetch a quote request; admin bearer token required. */
   @Get('quote-requests/:id')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')
@@ -87,6 +93,7 @@ export class AdminQuoteRequestsController {
     return this.quoteRequestsService.findOne(id, undefined, true);
   }
 
+  /** PATCH /api/v1/admin/quote-requests/:id/status — advance quote status; admin bearer token required. */
   @Patch('quote-requests/:id/status')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')

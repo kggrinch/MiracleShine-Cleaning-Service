@@ -5,6 +5,10 @@ import type { CreateAdminDto } from './users.service.js';
 
 const ADMIN_BOOTSTRAP_LOCK_ID = 748392615;
 
+/**
+ * Create the first administrator atomically; a transaction-scoped advisory
+ * lock prevents concurrent bootstrap runs from creating multiple admins.
+ */
 export async function bootstrapFirstAdmin(
   prisma: Pick<PrismaClient, '$transaction'>,
   dto: CreateAdminDto,

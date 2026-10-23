@@ -4,6 +4,7 @@ import { PrismaClient } from '../../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
+/** Configure Prisma's PostgreSQL adapter and tie connection lifetime to Nest. */
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy

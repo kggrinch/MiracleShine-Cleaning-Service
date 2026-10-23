@@ -18,6 +18,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { isPrismaUniqueConstraintError } from '../../prisma/prisma-errors.js';
 
+/** Appointment booking details, including strict date and 24-hour time inputs. */
 export class CreateAppointmentDto {
   @IsUUID()
   quoteRequestId!: string;
@@ -45,9 +46,11 @@ export class UpdateAppointmentStatusDto {
 export class UpdateAppointmentDto extends PartialType(CreateAppointmentDto) {}
 
 @Injectable()
+/** Enforce quote ownership, unique bookings, and appointment state transitions. */
 export class AppointmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** List appointments attached to a customer's quotes in date order. */
   async findCustomerAppointments(userId: string) {
     return this.prisma.appointment.findMany({
       where: {
@@ -58,6 +61,7 @@ export class AppointmentsService {
     });
   }
 
+  /** Fetch appointment details only for its owner unless the caller is an admin. */
   async findById(id: string, userId?: string, admin = false) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },
@@ -93,6 +97,7 @@ export class AppointmentsService {
     return appointment;
   }
 
+  /** Validate schedule and quote ownership before creating the unique booking. */
   async create(dto: CreateAppointmentDto, userId?: string, admin = false) {
     const schedule = this.parseSchedule(dto);
     const quoteRequest = await this.prisma.quoteRequest.findUnique({
@@ -140,6 +145,7 @@ export class AppointmentsService {
     }
   }
 
+  /** Cancel an active appointment while guarding against concurrent status changes. */
   async cancel(id: string, userId?: string, admin = false) {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },
@@ -163,6 +169,8 @@ export class AppointmentsService {
       );
     }
 
+    // Match the previously read status to prevent a stale cancellation from
+    // overwriting a simultaneous admin status update.
     const result = await this.prisma.appointment.updateMany({
       where: { id, status: appointment.status },
       data: { status: 'CANCELLED' },
@@ -178,6 +186,7 @@ export class AppointmentsService {
     });
   }
 
+  /** Enforce administrator access and permit only defined status transitions. */
   async updateStatus(
     id: string,
     dto: UpdateAppointmentStatusDto,
@@ -196,6 +205,7 @@ export class AppointmentsService {
       );
     }
 
+    // Terminal statuses have no outgoing transitions.
     const allowed: Record<string, string[]> = {
       REQUESTED: ['CONFIRMED', 'CANCELLED'],
       CONFIRMED: ['COMPLETED', 'CANCELLED'],
@@ -224,6 +234,7 @@ export class AppointmentsService {
     });
   }
 
+  /** Return all appointments with service and minimal customer details for admins. */
   async findAllAdmin() {
     return this.prisma.appointment.findMany({
       orderBy: { scheduledDate: 'asc' },
@@ -249,6 +260,7 @@ export class AppointmentsService {
     });
   }
 
+  /** Parse ISO date/time input and reject invalid dates or non-increasing time ranges. */
   private parseSchedule(dto: CreateAppointmentDto) {
     const date = new Date(`${dto.scheduledDate}T00:00:00.000Z`);
     const start = new Date(`1970-01-01T${dto.startTime}:00.000Z`);

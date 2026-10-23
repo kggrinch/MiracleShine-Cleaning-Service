@@ -5,6 +5,7 @@ import { AuthService } from './auth.service.js';
 import { OptionalAuthGuard } from './optional-auth.guard.js';
 import { RolesGuard } from './roles.guard.js';
 
+/** Register and export authentication primitives for protected feature modules. */
 @Module({
   controllers: [AuthController],
   providers: [AuthService, AuthGuard, OptionalAuthGuard, RolesGuard],

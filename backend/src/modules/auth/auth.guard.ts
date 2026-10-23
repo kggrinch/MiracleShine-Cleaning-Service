@@ -8,6 +8,7 @@ import type { Request } from 'express';
 import { AuthService } from './auth.service.js';
 
 @Injectable()
+/** Require a valid bearer token and attach its active database user to the request. */
 export class AuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 

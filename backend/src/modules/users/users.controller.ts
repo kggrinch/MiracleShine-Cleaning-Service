@@ -27,6 +27,7 @@ type AuthenticatedRequest = Request & {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  /** GET /api/v1/users/me — return the authenticated user's profile. */
   @Get('me')
   @UseGuards(AuthGuard)
   async getMe(@Req() req: AuthenticatedRequest) {
@@ -38,6 +39,7 @@ export class UsersController {
     return this.usersService.findMe(userId);
   }
 
+  /** PATCH /api/v1/users/me — update the authenticated user's profile fields. */
   @Patch('me')
   @UseGuards(AuthGuard)
   async updateMe(@Req() req: AuthenticatedRequest, @Body() dto: UpdateUserDto) {
@@ -49,6 +51,7 @@ export class UsersController {
     return this.usersService.updateMe(userId, dto);
   }
 
+  /** GET /api/v1/users/:id — fetch the caller's own profile or any profile as an admin. */
   @Get(':id')
   @UseGuards(AuthGuard)
   async getUser(@Req() req: AuthenticatedRequest) {
@@ -68,6 +71,7 @@ export class UsersController {
     return this.usersService.findOne(paramId);
   }
 
+  /** POST /api/v1/users/admin — create an administrator; admin bearer token required. */
   @Post('admin')
   @UseGuards(AuthGuard, RolesGuard)
   @RequireRoles('ADMIN')

@@ -12,6 +12,7 @@ type AuthenticatedRequest = Request & {
 };
 
 @Injectable()
+/** Permit anonymous requests, but reject a supplied invalid bearer token. */
 export class OptionalAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 

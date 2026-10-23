@@ -1,3 +1,4 @@
+/** Identify Prisma unique-constraint violations for domain-level conflict responses. */
 export function isPrismaUniqueConstraintError(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) {
     return false;
