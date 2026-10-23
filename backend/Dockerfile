@@ -1,43 +1,12 @@
-FROM node:22-alpine AS builder
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-COPY prisma.config.ts ./
 RUN npm install
 
-COPY prisma ./prisma
-COPY generated ./generated
-COPY src ./src
-COPY scripts ./scripts
-COPY tsconfig*.json ./
-COPY prisma.config.ts ./prisma.config.ts
-
-RUN npx prisma generate
-RUN npm run build
-
-FROM node:22-alpine AS runtime
-
-WORKDIR /app
-
-
-COPY package*.json ./
-
-# had --omit=dev which removes dev dependencies for deployment purposes. No need for this since we stay in development phase or now.
-RUN npm install 
-
-ENV NODE_ENV=production \
-    PORT=3000
-
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/generated ./generated
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY . .
 
 EXPOSE 3000
 
-# cmd overwritten by docker-compose.yml command, but kept here for security
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node dist/src/main.js"]
-
-
+CMD ["npm", "run", "start:dev"]
