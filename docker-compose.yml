@@ -3,15 +3,19 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-miracleshine}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-miracleshine_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-miracleshine}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5433"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-miracleshine} -d ${POSTGRES_DB:-miracleshine}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -20,37 +24,39 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    restart: "no"
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-miracleshine}:${POSTGRES_PASSWORD:-miracleshine_dev_password}@db:5432/${POSTGRES_DB:-miracleshine}?schema=public
       PORT: ${BACKEND_PORT:-3000}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set to a random secret of at least 32 bytes}
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm run start:prod"
+      JWT_SECRET: ${JWT_SECRET:-local-development-only-jwt-secret-change-me}
+    init: true
+    volumes:
+      - ./backend:/app
+      - backend-node-modules:/app/node_modules
+      - backend-generated:/app/generated
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npm run start:dev" // this command seeds the db on build make sure to remove when deploying
     ports:
-      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
+      - "127.0.0.1:${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    depends_on:
-      - backend
-    env_file:
-      - .env
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${BACKEND_PORT:-3000}}
+    init: true
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
-    command: sh -c "npm run dev -- --host 0.0.0.0 --port 5173"
+      - frontend-node-modules:/app/node_modules
 
 volumes:
   postgres-data:
+  backend-node-modules:
+  backend-generated:
+  frontend-node-modules:
