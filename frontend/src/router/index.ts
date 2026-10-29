@@ -4,6 +4,9 @@ import AboutView from '../views/AboutView.vue'
 import ServicesView from '../views/ServicesView.vue'
 import ContactQuoteView from '../views/ContactQuoteView.vue'
 import ReviewsView from '../views/ReviewsView.vue'
+import AuthView from '../views/AuthView.vue'
+import AccountView from '../views/AccountView.vue'
+import AdminView from '../views/AdminView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 
 const router = createRouter({
@@ -47,6 +50,21 @@ const router = createRouter({
       path: '/get-quote',
       name: 'get-quote',
       component: ContactQuoteView,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: AuthView,
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: AccountView,
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminView,
     },
     {
       path: '/:pathMatch(.*)*',
