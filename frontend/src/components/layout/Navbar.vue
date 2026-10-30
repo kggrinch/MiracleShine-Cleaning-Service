@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { Menu, Phone, Sparkles, X } from 'lucide-vue-next'
+import { useRoute, useRouter } from 'vue-router'
+import { Menu, Phone, Sparkles, X, LogIn, LayoutDashboard, LogOut } from 'lucide-vue-next'
 import AppButton from '@/components/ui/AppButton.vue'
+import { currentUser, signOut } from '@/services/auth'
 
 const route = useRoute()
+const router = useRouter()
 
 // Primary navigation. "Services" is a plain top-level link that navigates
 // directly to the services page - there is no dropdown or submenu.
@@ -17,6 +19,11 @@ const links = [
 ]
 
 const mobileMenuOpen = ref(false)
+
+async function logout() {
+  signOut()
+  await router.push('/')
+}
 
 /** Close the mobile menu whenever the route changes so stale panels never linger. */
 watch(
@@ -60,6 +67,20 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
       </nav>
 
       <div class="hidden items-center gap-3 lg:flex">
+        <template v-if="currentUser">
+          <RouterLink
+            :to="currentUser.role === 'ADMIN' ? '/admin' : '/account'"
+            class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-primary"
+          >
+            <LayoutDashboard class="h-4 w-4" /> Dashboard
+          </RouterLink>
+          <button type="button" class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-primary" @click="logout">
+            <LogOut class="h-4 w-4" /> Sign out
+          </button>
+        </template>
+        <RouterLink v-else to="/login" class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-primary">
+          <LogIn class="h-4 w-4" /> Sign in
+        </RouterLink>
         <a
           href="tel:4255551234"
           class="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition duration-300 hover:-translate-y-0.5 hover:border-primary hover:text-primary"
@@ -99,6 +120,29 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
           >
             {{ link.name }}
                     </RouterLink>
+
+                    <RouterLink
+                      v-if="currentUser"
+                      :to="currentUser.role === 'ADMIN' ? '/admin' : '/account'"
+                      class="rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
+                    >
+                      Dashboard
+                    </RouterLink>
+                    <RouterLink
+                      v-else
+                      to="/login"
+                      class="rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
+                    >
+                      Customer sign in
+                    </RouterLink>
+                    <button
+                      v-if="currentUser"
+                      type="button"
+                      class="rounded-2xl px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
+                      @click="logout"
+                    >
+                      Sign out
+                    </button>
 
           <AppButton to="/get-quote" variant="primary" block class="mt-3 mb-4" @click="mobileMenuOpen = false">
             <Sparkles class="h-4 w-4" />

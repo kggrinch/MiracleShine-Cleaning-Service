@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Check } from 'lucide-vue-next'
-import type { CleaningService } from '@/data/services'
+import type { CleaningServiceCard } from '@/data/services'
 
 defineProps<{
-  service: CleaningService
+  service: CleaningServiceCard
   /** Renders the "includes" checklist (used on the full services page grid). */
   detailed?: boolean
 }>()
@@ -42,6 +42,13 @@ defineProps<{
         {{ service.description }}
       </p>
 
+      <p class="mt-3 text-sm font-semibold text-slate-800">
+        {{ service.startingPrice === null ? 'Custom quote' : `From $${Number(service.startingPrice).toFixed(2)}` }}
+        <span v-if="service.estimatedDurationMinutes" class="font-normal text-slate-500">
+          &middot; {{ service.estimatedDurationMinutes }} min
+        </span>
+      </p>
+
       <ul v-if="detailed && service.includes.length" class="mt-5 space-y-2.5 border-t border-slate-100 pt-5">
         <li v-for="item in service.includes" :key="item" class="flex items-center gap-2.5 text-sm text-slate-600">
           <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-50 text-primary transition-colors duration-300 group-hover:bg-sky-100">
@@ -54,7 +61,7 @@ defineProps<{
       <div v-if="!detailed" class="mt-6 flex-1" aria-hidden="true" />
 
       <RouterLink
-        to="/get-quote"
+        :to="{ name: 'get-quote', query: { serviceId: service.id } }"
         class="mt-6 inline-flex items-center gap-2 font-semibold text-primary transition-colors duration-300 group-hover:text-primary-dark"
       >
         {{ detailed ? 'Get this service' : 'Learn more' }}
