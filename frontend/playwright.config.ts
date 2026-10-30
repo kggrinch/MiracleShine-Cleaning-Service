@@ -1,5 +1,8 @@
+import { randomBytes } from 'node:crypto'
 import process from 'node:process'
 import { defineConfig, devices } from '@playwright/test'
+
+const localJwtSecret = randomBytes(48).toString('base64')
 
 /**
  * Read environment variables from file.
@@ -97,14 +100,25 @@ export default defineConfig({
   // outputDir: 'test-results/',
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    /**
-     * Use the dev server by default for faster feedback loop.
-     * Use the preview server on CI for more realistic testing.
-     * Playwright will re-use the local server if there is already a dev-server running.
-     */
-    command: process.env.CI ? 'npm run preview' : 'npm run dev',
-    port: process.env.CI ? 4173 : 5173,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      /**
+       * Use the dev server by default for faster feedback loop.
+       * Use the preview server on CI for more realistic testing.
+       * Playwright will re-use the local server if there is already a dev-server running.
+       */
+      command: process.env.CI ? 'npm run preview' : 'npm run dev',
+      port: process.env.CI ? 4173 : 5173,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: 'npm run start:dev',
+      cwd: '../backend',
+      port: 3000,
+      reuseExistingServer: false,
+      env: {
+        JWT_SECRET: localJwtSecret,
+      },
+    },
+  ],
 })

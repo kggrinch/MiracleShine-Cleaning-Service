@@ -66,6 +66,22 @@ npm run test:e2e -- tests/example.spec.ts
 npm run test:e2e -- --debug
 ```
 
+The Playwright configuration starts the frontend and backend. The backend reads
+`backend/.env` and connects to its configured PostgreSQL database; make sure it
+points to a local development database before running the suite. Tests include
+read-only page/API checks, quote-form validation, and a login attempt using
+synthetic invalid credentials. They do not create or modify database records.
+The backend receives a randomly generated, process-local JWT secret for the
+test run; no secret is written to a file.
+
+The full-stack workflow additionally requires `E2E_ADMIN_EMAIL` and
+`E2E_ADMIN_PASSWORD` in the environment. It creates a unique synthetic customer,
+quote, appointment, review, contact message, and service; checks their database
+relationships and final statuses; then removes only those uniquely identified
+test records. It never runs the destructive Prisma seed command. The appointment
+and contact submissions use real HTTP requests because the current customer UI
+does not provide an appointment-booking or contact-message form.
+
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh
