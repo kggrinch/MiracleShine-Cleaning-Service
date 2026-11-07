@@ -2,11 +2,14 @@
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import BackToTop from '@/components/layout/BackToTop.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-background">
-    <Navbar />
+    <Navbar v-if="!route.meta.portal" />
 
     <main class="flex-1">
       <!-- Route transition keeps navigation feeling responsive. -->
@@ -17,8 +20,8 @@ import BackToTop from '@/components/layout/BackToTop.vue'
       </RouterView>
     </main>
 
-    <Footer />
+    <Footer v-if="!route.meta.portal" />
 
-    <BackToTop />
+    <BackToTop v-if="!route.meta.portal" />
   </div>
 </template>

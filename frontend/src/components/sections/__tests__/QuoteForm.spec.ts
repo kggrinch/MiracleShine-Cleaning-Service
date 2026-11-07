@@ -5,15 +5,22 @@ import api from '@/services/api'
 import QuoteForm from '../QuoteForm.vue'
 
 vi.mock('@/services/api', () => ({
-  default: { post: vi.fn() },
+  default: { get: vi.fn(), post: vi.fn() },
 }))
 
 describe('QuoteForm', () => {
+  const serviceId = 'service-1'
+
   beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.get).mockResolvedValue({
+      data: [{ id: serviceId, name: 'Residential Cleaning' }],
+    } as AxiosResponse)
     vi.mocked(api.post).mockReset()
   })
 
   async function fillForm(wrapper: ReturnType<typeof mount>) {
+    await flushPromises()
     await wrapper.find('#quote-first-name').setValue('Ava')
     await wrapper.find('#quote-last-name').setValue('Smith')
     await wrapper.find('#quote-phone').setValue('425-555-0101')
@@ -34,11 +41,11 @@ describe('QuoteForm', () => {
     await flushPromises()
 
     expect(api.post).toHaveBeenCalledWith('/quote-requests', {
+      serviceId,
       customerFirstName: 'Ava',
       customerLastName: 'Smith',
       customerEmail: 'ava@example.com',
       customerPhone: '425-555-0101',
-      service: 'Commercial Cleaning',
       propertyType: 'HOUSE',
       streetAddress: '1 Main Street',
       city: 'Seattle',
@@ -67,6 +74,6 @@ describe('QuoteForm', () => {
     await wrapper.find('form').trigger('submit')
 
     expect(api.post).not.toHaveBeenCalled()
-    expect(wrapper.text()).toContain('Please enter the city.')
+    expect(wrapper.text()).toContain('Enter between 2 and 100 characters.')
   })
 })

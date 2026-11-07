@@ -1,10 +1,26 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { CalendarCheck, PhoneCall, Sparkles } from 'lucide-vue-next'
-import { services } from '@/data/services'
+import { fetchPublicServices, toServiceCard, type CleaningServiceCard } from '@/data/services'
 import ServiceCard from '@/components/services/ServiceCard.vue'
 import PageBanner from '@/components/layout/PageBanner.vue'
 import BackgroundDecor from '@/components/ui/BackgroundDecor.vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import { getApiErrorMessage } from '@/services/errors'
+
+const services = ref<CleaningServiceCard[]>([])
+const isLoading = ref(true)
+const loadError = ref('')
+
+onMounted(async () => {
+  try {
+    services.value = (await fetchPublicServices()).map(toServiceCard)
+  } catch (error) {
+    loadError.value = getApiErrorMessage(error, 'Services could not be loaded. Please try again later.')
+  } finally {
+    isLoading.value = false
+  }
+})
 
 // Step-by-step "how it works" strip that turns interest into action.
 const steps = [
@@ -48,10 +64,13 @@ const steps = [
 
       <!-- Every service card shares the same data + component as the home grid -->
       <div class="mt-12 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <p v-if="isLoading" class="col-span-full text-center text-slate-600" role="status">Loading services…</p>
+        <p v-else-if="loadError" class="col-span-full text-center text-red-700" role="alert">{{ loadError }}</p>
+        <p v-else-if="services.length === 0" class="col-span-full text-center text-slate-600">No services are available right now.</p>
         <div
           v-for="(service, index) in services"
           :id="service.slug"
-          :key="service.slug"
+          :key="service.id"
           class="scroll-mt-24"
           v-reveal="(index % 3) * 90"
         >

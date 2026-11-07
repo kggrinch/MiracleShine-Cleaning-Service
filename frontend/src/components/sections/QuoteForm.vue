@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import axios from 'axios'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { CircleCheck, Mail, Phone, Send } from 'lucide-vue-next'
 import api from '@/services/api'
+import { fetchPublicServices, type CleaningService } from '@/data/services'
+import { getApiErrorMessage } from '@/services/errors'
 
 type FormState = {
   firstName: string
@@ -14,9 +15,14 @@ type FormState = {
   state: string
   postalCode: string
   propertyType: string
-  service: string
+  serviceId: string
   message: string
 }
+
+const props = defineProps<{ serviceId?: string }>()
+const services = ref<CleaningService[]>([])
+const isLoadingServices = ref(true)
+const serviceLoadError = ref('')
 
 const form = reactive<FormState>({
   firstName: '',
@@ -28,7 +34,7 @@ const form = reactive<FormState>({
   state: '',
   postalCode: '',
   propertyType: 'HOUSE',
-  service: 'Commercial Cleaning',
+  serviceId: '',
   message: '',
 })
 
@@ -39,18 +45,45 @@ const submitError = ref('')
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+watch(
+  () => props.serviceId,
+  (serviceId) => {
+    if (serviceId && services.value.some((service) => service.id === serviceId)) {
+      form.serviceId = serviceId
+    }
+  },
+)
+
+onMounted(async () => {
+  try {
+    services.value = await fetchPublicServices()
+    const requestedServiceId = props.serviceId ?? ''
+    form.serviceId = services.value.some((service) => service.id === requestedServiceId)
+      ? requestedServiceId
+      : services.value[0]?.id ?? ''
+  } catch (error) {
+    serviceLoadError.value = getApiErrorMessage(
+      error,
+      'Services could not be loaded. Please try again later.',
+    )
+  } finally {
+    isLoadingServices.value = false
+  }
+})
+
 function validate(): Partial<Record<keyof FormState, string>> {
   const next: Partial<Record<keyof FormState, string>> = {}
-  if (!form.firstName.trim()) next.firstName = 'Please enter your first name.'
-  if (!form.lastName.trim()) next.lastName = 'Please enter your last name.'
-  if (!form.phone.trim()) next.phone = 'Please enter a phone number.'
+  if (form.firstName.trim().length < 2 || form.firstName.trim().length > 100) next.firstName = 'Enter between 2 and 100 characters.'
+  if (form.lastName.trim().length < 2 || form.lastName.trim().length > 100) next.lastName = 'Enter between 2 and 100 characters.'
+  if (form.phone.trim().length > 30) next.phone = 'Phone number must be 30 characters or fewer.'
   if (!form.email.trim()) next.email = 'Please enter your email address.'
   else if (!emailRe.test(form.email)) next.email = 'Please enter a valid email address.'
-  if (!form.address.trim()) next.address = 'Please enter the service address.'
-  if (!form.city.trim()) next.city = 'Please enter the city.'
-  if (!form.state.trim()) next.state = 'Please enter the state.'
-  if (!form.postalCode.trim()) next.postalCode = 'Please enter the ZIP or postal code.'
-  if (!form.message.trim()) next.message = 'Tell us a little about your space and needs.'
+  if (form.address.trim().length < 3 || form.address.trim().length > 255) next.address = 'Enter between 3 and 255 characters.'
+  if (form.city.trim().length < 2 || form.city.trim().length > 100) next.city = 'Enter between 2 and 100 characters.'
+  if (form.state.trim().length < 2 || form.state.trim().length > 100) next.state = 'Enter between 2 and 100 characters.'
+  if (form.postalCode.trim().length < 3 || form.postalCode.trim().length > 20) next.postalCode = 'Enter between 3 and 20 characters.'
+  if (form.message.trim().length > 5000) next.message = 'Message must be 5,000 characters or fewer.'
+  if (!form.serviceId) submitError.value = serviceLoadError.value || 'Choose an available service.'
   return next
 }
 
@@ -68,11 +101,11 @@ async function onSubmit() {
   isSubmitting.value = true
   try {
     await api.post('/quote-requests', {
+      serviceId: form.serviceId,
       customerFirstName: form.firstName.trim(),
       customerLastName: form.lastName.trim(),
       customerEmail: form.email.trim(),
       customerPhone: form.phone.trim(),
-      service: form.service,
       propertyType: form.propertyType,
       streetAddress: form.address.trim(),
       city: form.city.trim(),
@@ -82,16 +115,10 @@ async function onSubmit() {
     })
     submitted.value = true
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const message: unknown = error.response?.data?.message
-      submitError.value = Array.isArray(message)
-        ? message.join(' ')
-        : typeof message === 'string'
-          ? message
-          : 'We could not submit your request. Please try again.'
-    } else {
-      submitError.value = 'We could not submit your request. Please try again.'
-    }
+    submitError.value = getApiErrorMessage(
+      error,
+      'We could not submit your request. Please try again.',
+    )
   } finally {
     isSubmitting.value = false
   }
@@ -107,7 +134,7 @@ function resetForm() {
   form.state = ''
   form.postalCode = ''
   form.propertyType = 'HOUSE'
-  form.service = 'Commercial Cleaning'
+  form.serviceId = services.value[0]?.id ?? ''
   form.message = ''
   ;(Object.keys(errors) as (keyof FormState)[]).forEach((key) => {
     errors[key] = undefined
@@ -182,6 +209,7 @@ function resetForm() {
                   id="quote-first-name"
                   v-model="form.firstName"
                   type="text"
+                  maxlength="100"
                   autocomplete="given-name"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   :class="errors.firstName ? 'border-red-300 focus:border-red-400' : ''"
@@ -199,6 +227,7 @@ function resetForm() {
                   id="quote-last-name"
                   v-model="form.lastName"
                   type="text"
+                  maxlength="100"
                   autocomplete="family-name"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   :class="errors.lastName ? 'border-red-300 focus:border-red-400' : ''"
@@ -211,11 +240,12 @@ function resetForm() {
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700" for="quote-phone">
-                Phone
+                Phone <span class="font-normal text-slate-500">(optional)</span>
                 <input
                   id="quote-phone"
                   v-model="form.phone"
                   type="tel"
+                  maxlength="30"
                   autocomplete="tel"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   :class="errors.phone ? 'border-red-300 focus:border-red-400' : ''"
@@ -253,6 +283,8 @@ function resetForm() {
                   id="quote-address"
                   v-model="form.address"
                   type="text"
+                  minlength="3"
+                  maxlength="255"
                   autocomplete="street-address"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   :class="errors.address ? 'border-red-300 focus:border-red-400' : ''"
@@ -268,18 +300,15 @@ function resetForm() {
               Cleaning Type
               <select
                 id="quote-service"
-                v-model="form.service"
+                v-model="form.serviceId"
+                required
+                :disabled="isLoadingServices || services.length === 0"
                 class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
               >
-                <option>Residential Cleaning</option>
-                <option>Commercial Cleaning</option>
-                <option>Deep Cleaning</option>
-                <option>Move In / Move Out Cleaning</option>
-                <option>Disinfecting and Sanitizing</option>
-                <option>Post Construction Cleaning</option>
-                <option>Carpet Cleaning</option>
-                <option>Office Cleaning</option>
-                <option>Specialty Cleaning</option>
+                <option value="" disabled>{{ isLoadingServices ? 'Loading services…' : 'Choose a service' }}</option>
+                <option v-for="service in services" :key="service.id" :value="service.id">
+                  {{ service.name }}
+                </option>
               </select>
             </label>
           </div>
@@ -305,6 +334,8 @@ function resetForm() {
                   id="quote-city"
                   v-model="form.city"
                   type="text"
+                  minlength="2"
+                  maxlength="100"
                   autocomplete="address-level2"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   placeholder="Seattle"
@@ -319,6 +350,8 @@ function resetForm() {
                   id="quote-state"
                   v-model="form.state"
                   type="text"
+                  minlength="2"
+                  maxlength="100"
                   autocomplete="address-level1"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   placeholder="WA"
@@ -335,6 +368,8 @@ function resetForm() {
                   id="quote-postal-code"
                   v-model="form.postalCode"
                   type="text"
+                  minlength="3"
+                  maxlength="20"
                   autocomplete="postal-code"
                   class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
                   placeholder="98101"
@@ -351,6 +386,7 @@ function resetForm() {
             <textarea
               id="quote-message"
               v-model="form.message"
+              maxlength="5000"
               class="mt-2 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
               :class="errors.message ? 'border-red-300 focus:border-red-400' : ''"
               placeholder="Tell us about your space and scheduling needs."
@@ -359,6 +395,8 @@ function resetForm() {
           <p v-if="errors.message" class="text-sm text-red-600" role="alert">
             {{ errors.message }}
           </p>
+          <p v-if="serviceLoadError" class="mt-2 text-sm text-red-700" role="alert">{{ serviceLoadError }}</p>
+          <p v-else-if="isLoadingServices" class="mt-2 text-sm text-slate-500" role="status">Loading available services…</p>
           <p v-if="submitError" class="mt-4 text-sm text-red-600" role="alert">{{ submitError }}</p>
 
           <button
