@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import ContactQuotePanel from '@/components/contact/ContactQuotePanel.vue'
 import QuoteForm from '@/components/sections/QuoteForm.vue'
 import BackgroundDecor from '@/components/ui/BackgroundDecor.vue'
+import ContactMessageForm from '@/components/contact/ContactMessageForm.vue'
 
 /**
  * Shared Contact / Get-a-Quote page.
@@ -26,6 +27,10 @@ const content = computed(() => {
       : 'Reach out for a personalized estimate, a same-week consultation, or a custom cleaning plan built around your priorities.',
   }
 })
+
+const serviceId = computed(() =>
+  typeof route.query.serviceId === 'string' ? route.query.serviceId : undefined,
+)
 </script>
 
 <template>
@@ -40,7 +45,8 @@ const content = computed(() => {
       />
 
       <!-- Compact quote section that sits alongside the intro panel -->
-      <QuoteForm compact />
+      <QuoteForm compact :service-id="serviceId" />
+      <ContactMessageForm />
     </section>
   </div>
 </template>

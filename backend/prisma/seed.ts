@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
+// The seed is destructive: it replaces existing application records with a
+// predictable local demo dataset. Do not run it against production data.
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
 });
@@ -17,7 +19,7 @@ async function main() {
     12,
   );
 
-  // Clear existing demo records in dependency order.
+  // Delete dependents before the records they reference to satisfy foreign keys.
   await prisma.review.deleteMany();
   await prisma.appointment.deleteMany();
   await prisma.contactMessage.deleteMany();
@@ -25,7 +27,7 @@ async function main() {
   await prisma.service.deleteMany();
   await prisma.user.deleteMany();
 
-  // 1. Users
+  // Create identities first so later demo records can refer to customer IDs.
   const admin = await prisma.user.create({
     data: {
       firstName: "MiracleShine",
@@ -66,7 +68,7 @@ async function main() {
     },
   });
 
-  // 2. Services
+  // Build the catalog used by the sample quote requests.
   const services = await Promise.all([
     prisma.service.create({
       data: {
@@ -151,7 +153,7 @@ async function main() {
     }),
   ]);
 
-  // 3. Quote requests
+  // Include both account-linked and guest submissions to demonstrate optional ownership.
   const quote1 = await prisma.quoteRequest.create({
     data: {
       userId: customer1.id,
@@ -217,7 +219,7 @@ async function main() {
     },
   });
 
-  // 4. Appointments — one appointment per quote in this design.
+  // Each quote can have at most one appointment in the data model.
   const appointment1 = await prisma.appointment.create({
     data: {
       quoteRequestId: quote1.id,
@@ -240,7 +242,7 @@ async function main() {
     },
   });
 
-  // 5. Contact messages
+  // Demonstrate both authenticated and guest contact-form submissions.
   await prisma.contactMessage.create({
     data: {
       userId: customer3.id,
@@ -264,7 +266,7 @@ async function main() {
     },
   });
 
-  // 6. Review
+  // Reviews are linked to completed-work examples and include a public approved review.
   await prisma.review.create({
     data: {
       appointmentId: appointment1.id,
