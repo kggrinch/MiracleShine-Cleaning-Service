@@ -77,14 +77,14 @@ async function submit() {
       <div class="hidden flex-col justify-between bg-slate-950 p-10 text-white md:flex">
         <RouterLink to="/" class="inline-flex items-center gap-3">
           <Sparkles class="h-7 w-7 text-sky-300" />
-          <span class="text-lg font-semibold">Miracle Shine</span>
+          <span class="text-lg font-semibold">MiracleShine Cleaning Service</span>
         </RouterLink>
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.25em] text-sky-300">{{ roleLabel }} portal</p>
           <h1 class="mt-4 text-4xl font-semibold leading-tight">
             {{ isRegistration ? 'A brighter way to manage your cleaning.' : 'Welcome back to a space that shines.' }}
           </h1>
-          <p class="mt-5 leading-7 text-slate-300">Access your account securely and stay connected with your Miracle Shine service.</p>
+          <p class="mt-5 leading-7 text-slate-300">Access your account securely and stay connected with MiracleShine Cleaning Service.</p>
         </div>
         <p class="flex items-center gap-2 text-sm text-slate-400"><ShieldCheck class="h-4 w-4 text-sky-300" /> Your account is protected by secure sign-in.</p>
       </div>
@@ -139,7 +139,7 @@ async function submit() {
 
         <p v-if="!isAdminLogin" class="mt-6 text-center text-sm text-slate-600">
           <template v-if="isRegistration">Already registered? <RouterLink to="/login" class="font-semibold text-primary hover:underline">Sign in</RouterLink></template>
-          <template v-else>New to Miracle Shine? <RouterLink to="/register" class="font-semibold text-primary hover:underline">Create an account</RouterLink></template>
+          <template v-else>New to MiracleShine Cleaning Service? <RouterLink to="/register" class="font-semibold text-primary hover:underline">Create an account</RouterLink></template>
         </p>
         <p v-if="!isAdminLogin && !isRegistration" class="mt-3 text-center text-xs text-slate-500">
           Administrator? <RouterLink to="/admin/login" class="font-medium text-primary hover:underline">Use administrator sign-in</RouterLink>

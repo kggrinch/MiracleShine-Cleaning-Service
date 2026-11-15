@@ -53,7 +53,7 @@ async function submit() {
         <CircleCheck class="mt-0.5 h-5 w-5 shrink-0" />
         <div>
           <p class="font-semibold">Message received</p>
-          <p class="mt-1 text-sm">Thank you. The Miracle Shine team will follow up using the contact information you provided.</p>
+          <p class="mt-1 text-sm">Thank you. The MiracleShine Cleaning Service team will follow up using the contact information you provided.</p>
         </div>
       </div>
       <form v-else class="mt-6 space-y-4" novalidate @submit.prevent="submit">

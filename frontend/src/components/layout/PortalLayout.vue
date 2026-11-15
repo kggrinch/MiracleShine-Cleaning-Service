@@ -42,7 +42,7 @@ async function logout() {
   <div class="min-h-screen bg-slate-50">
     <header class="border-b border-slate-200 bg-white">
       <div class="mx-auto flex max-w-[90rem] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <RouterLink to="/" class="flex items-center gap-3" aria-label="Miracle Shine home">
+        <RouterLink to="/" class="flex items-center gap-3" aria-label="MiracleShine Cleaning Service home">
           <img src="/m_logo.png" alt="" class="h-10 w-32 rounded-lg object-cover" />
           <span class="hidden border-l border-slate-200 pl-3 text-sm font-semibold text-slate-600 sm:block">
             {{ isAdmin ? 'Administrator portal' : 'Customer portal' }}

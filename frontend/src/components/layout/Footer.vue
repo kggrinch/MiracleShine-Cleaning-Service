@@ -10,16 +10,15 @@ import { Clock3, Mail, MapPin, Phone, Sparkles } from 'lucide-vue-next'
       aria-hidden="true"
     />
 
-    <div class="relative mx-auto grid max-w-7xl gap-10 px-6 py-14 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.7fr] lg:px-8">
+    <div class="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.7fr] lg:px-8">
       <div>
-        <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-lg font-semibold text-primary">
-            MS
-          </div>
-          <div>
-            <p class="text-lg font-semibold text-slate-900">Miracle Shine Cleaning Service</p>
-            <p class="text-sm text-slate-500">Premium cleaning with a personal touch</p>
-          </div>
+        <div class="flex flex-col items-start gap-3">
+          <img
+            src="/miracleshine-cleaning-service-modernized.svg"
+            alt="MiracleShine Cleaning Service"
+            class="h-auto w-56 max-w-full object-contain"
+          />
+          <p class="text-sm text-slate-500">Premium cleaning with a personal touch</p>
         </div>
 
         <p class="mt-5 max-w-md text-sm leading-7 text-slate-600">
@@ -66,7 +65,7 @@ import { Clock3, Mail, MapPin, Phone, Sparkles } from 'lucide-vue-next'
 
     <div class="relative border-t border-slate-200/80">
       <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-6 py-5 text-center text-xs text-slate-400 sm:flex-row sm:text-left lg:px-8">
-        <p>&copy; {{ new Date().getFullYear() }} Miracle Shine Cleaning Service. All rights reserved.</p>
+        <p>&copy; {{ new Date().getFullYear() }} MiracleShine Cleaning Service. All rights reserved.</p>
         <p>Licensed &amp; insured &middot; Serving the greater Seattle area</p>
       </div>
     </div>

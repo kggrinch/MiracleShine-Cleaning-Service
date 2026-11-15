@@ -10,7 +10,7 @@ import { CheckCircle2, HeartHandshake, ShieldCheck, Sparkles } from 'lucide-vue-
       </div>
 
       <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">About Miracle Shine</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">About MiracleShine Cleaning Service</p>
         <h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
           Bringing quality, comfort, and calm to every space we serve.
         </h2>

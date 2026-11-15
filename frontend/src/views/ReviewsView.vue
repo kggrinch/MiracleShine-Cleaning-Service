@@ -31,7 +31,7 @@ onMounted(async () => {
     <PageBanner
       eyebrow="Reviews"
       title="Trusted by clients who value reliability and polished results."
-      description="Approved customer feedback from completed Miracle Shine appointments."
+      description="Approved customer feedback from completed MiracleShine Cleaning Service appointments."
     />
 
     <div v-if="averageRating" class="mt-12 flex flex-col gap-6 rounded-[2.5rem] border border-slate-200 bg-slate-950 p-8 text-white sm:flex-row sm:items-center sm:justify-between lg:p-10">

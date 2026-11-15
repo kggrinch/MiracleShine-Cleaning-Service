@@ -25,7 +25,7 @@ import AppButton from '@/components/ui/AppButton.vue'
           Professional commercial cleaning you can trust.
         </h1>
 
-        <p class="hero-fade hero-fade-3 mt-6 max-w-2xl text-lg leading-8 text-slate-200 sm:text-xl">
+        <p class="hero-fade hero-fade-3 relative isolate mt-6 max-w-2xl text-lg leading-8 text-white drop-shadow-sm before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-2xl before:bg-gradient-to-r before:from-black/30 before:via-black/20 before:to-transparent before:blur-lg before:content-[''] sm:text-xl">
           MiracleShine delivers polished, dependable cleaning for offices, facilities, and homes - with detail-driven service and a satisfaction guarantee on every visit.
         </p>
 
@@ -38,18 +38,18 @@ import AppButton from '@/components/ui/AppButton.vue'
           </AppButton>
         </div>
 
-        <div class="hero-fade hero-fade-5 mt-10 grid gap-4 sm:grid-cols-3">
-          <div class="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-white/12 px-4 py-3 text-white shadow-sm backdrop-blur">
-            <ShieldCheck class="h-4 w-4 shrink-0 text-sky-300" />
+        <div class="hero-fade hero-fade-5 relative z-10 mt-10 grid gap-4 sm:grid-cols-3">
+          <div class="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-slate-900 shadow-sm backdrop-blur">
+            <ShieldCheck class="h-4 w-4 shrink-0 text-primary-dark" />
             <span class="font-semibold">Licensed &amp; insured</span>
           </div>
-          <div class="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-white/12 px-4 py-3 text-white shadow-sm backdrop-blur">
-            <Clock3 class="h-4 w-4 shrink-0 text-sky-300" />
+          <div class="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-slate-900 shadow-sm backdrop-blur">
+            <Clock3 class="h-4 w-4 shrink-0 text-primary-dark" />
             <span class="font-semibold">Flexible scheduling</span>
           </div>
-          <div class="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-white/12 px-4 py-3 text-white shadow-sm backdrop-blur">
-            <Star class="h-4 w-4 shrink-0 text-accent" />
-            <span class="font-semibold">4.9/5 rating</span>
+          <div class="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-slate-900 shadow-sm backdrop-blur">
+            <Sparkles class="h-4 w-4 shrink-0 text-amber-700" />
+            <span class="font-semibold">Detail-focused cleaning</span>
           </div>
         </div>
       </div>
@@ -63,8 +63,8 @@ import AppButton from '@/components/ui/AppButton.vue'
         <p class="text-xs text-slate-600">Backed on every visit</p>
       </div>
 
-      <!-- Floating rating badge (bottom-left, over the darker gradient side) -->
-      <div class="hero-float-delay absolute bottom-6 left-24 hidden lg:block rounded-2xl border border-white/20 bg-white/90 px-4 py-2.5 shadow-lg shadow-black/20 backdrop-blur">
+      <!-- Floating rating badge (top-left, opposite the satisfaction badge) -->
+      <div class="hero-float-delay absolute left-24 top-8 hidden lg:block rounded-2xl border border-white/20 bg-white/90 px-4 py-2.5 shadow-lg shadow-black/20 backdrop-blur xl:top-14">
         <div class="flex items-center gap-1 text-accent">
           <Star v-for="n in 5" :key="n" class="h-4 w-4 fill-current" />
         </div>

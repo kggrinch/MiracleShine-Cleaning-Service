@@ -49,7 +49,7 @@ const values: Value[] = [
     <PageBanner
       eyebrow="About us"
       title="A local cleaning company built on trust, consistency, and care."
-      description="Miracle Shine Cleaning Service exists to give busy families and successful businesses the gift of a space that feels genuinely refreshed - handled with respect and finished with pride."
+      description="MiracleShine Cleaning Service exists to give busy families and successful businesses the gift of a space that feels genuinely refreshed - handled with respect and finished with pride."
     />
 
     <div class="mt-12 grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
@@ -67,7 +67,7 @@ const values: Value[] = [
           We bring order, polish, and peace of mind to every visit.
         </h2>
         <p class="mt-5 text-lg leading-8 text-slate-600">
-          Miracle Shine was founded on a simple belief: a truly well-kept space can change the way a home feels and the way a business operates. We combine professional training with a genuine, personal approach so every job is finished to a standard we'd be proud to stand behind.
+          MiracleShine Cleaning Service was founded on a simple belief: a truly well-kept space can change the way a home feels and the way a business operates. We combine professional training with a genuine, personal approach so every job is finished to a standard we'd be proud to stand behind.
         </p>
         <p class="mt-4 text-lg leading-8 text-slate-600">
           Whether it's a daily office refresh or a thorough move-out reset, we show up on time, respect your space, and never stop until the details are right.
@@ -103,7 +103,7 @@ const values: Value[] = [
       <div class="max-w-2xl">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">What we stand for</p>
         <h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          Why customers choose Miracle Shine, again and again.
+          Why customers choose MiracleShine Cleaning Service, again and again.
         </h2>
       </div>
 
