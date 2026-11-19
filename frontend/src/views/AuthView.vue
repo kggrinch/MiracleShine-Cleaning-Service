@@ -98,7 +98,7 @@ async function submit() {
           {{ isRegistration ? 'Get started' : 'Welcome back' }}
         </h2>
         <p class="mt-2 text-slate-600">
-          {{ isRegistration ? 'Track requests and appointments in one place.' : 'Enter your credentials to continue.' }}
+          {{ isRegistration ? 'Track your quote requests in one place.' : 'Enter your credentials to continue.' }}
         </p>
 
         <form class="mt-8 space-y-4" novalidate @submit.prevent="submit">

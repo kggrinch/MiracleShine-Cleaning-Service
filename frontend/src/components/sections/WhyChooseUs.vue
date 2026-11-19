@@ -10,7 +10,7 @@ const features = [
   },
   {
     title: 'Reliable Scheduling',
-    description: 'Flexible appointments that fit your routine, property demands, and service preferences.',
+    description: 'Flexible cleaning plans tailored to your routine, property demands, and service preferences.',
     icon: Clock3,
   },
   {

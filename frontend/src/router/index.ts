@@ -12,9 +12,9 @@ import AdminQuotesView from '../views/AdminQuotesView.vue'
 import QuoteDetailView from '../views/QuoteDetailView.vue'
 import AdminServicesView from '../views/AdminServicesView.vue'
 import AdminMessagesView from '../views/AdminMessagesView.vue'
-import AppointmentsView from '../views/AppointmentsView.vue'
 import AdminReviewsView from '../views/AdminReviewsView.vue'
 import CustomerSettingsView from '../views/CustomerSettingsView.vue'
+import CustomerReviewsView from '../views/CustomerReviewsView.vue'
 import { currentUser, initializeAuth, type UserRole } from '@/services/auth'
 
 declare module 'vue-router' {
@@ -96,7 +96,6 @@ const router = createRouter({
         { path: 'quotes/:id', name: 'admin-quote-detail', component: QuoteDetailView },
         { path: 'services', name: 'admin-services', component: AdminServicesView },
         { path: 'messages', name: 'admin-messages', component: AdminMessagesView },
-        { path: 'appointments', name: 'admin-appointments', component: AppointmentsView },
         { path: 'reviews', name: 'admin-reviews', component: AdminReviewsView },
         { path: 'settings', name: 'admin-settings', component: CustomerSettingsView },
       ],
@@ -109,7 +108,7 @@ const router = createRouter({
         { path: '', name: 'customer-home', component: DashboardHomeView },
         { path: 'quotes', name: 'customer-quotes', component: DashboardHomeView },
         { path: 'quotes/:id', name: 'customer-quote-detail', component: QuoteDetailView },
-        { path: 'appointments', name: 'customer-appointments', component: AppointmentsView },
+        { path: 'reviews', name: 'customer-reviews', component: CustomerReviewsView },
         { path: 'settings', name: 'customer-settings', component: CustomerSettingsView },
       ],
     },

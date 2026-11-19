@@ -2,23 +2,8 @@ import type { CleaningService } from '@/services/catalog'
 
 export type QuoteStatus =
   | 'PENDING'
-  | 'CONTACTED'
-  | 'QUOTED'
-  | 'ACCEPTED'
-  | 'DECLINED'
-  | 'COMPLETED'
-
-export type AppointmentStatus = 'REQUESTED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-
-export type Appointment = {
-  id: string
-  quoteRequestId: string
-  scheduledDate: string
-  startTime: string
-  endTime: string
-  status: AppointmentStatus
-  notes: string | null
-}
+  | 'SENT'
+  | 'REJECTED'
 
 export type QuoteRequest = {
   id: string
@@ -34,14 +19,11 @@ export type QuoteRequest = {
   city: string
   state: string
   postalCode: string
-  preferredDate: string | null
-  preferredTime: string | null
   notes: string | null
   status: QuoteStatus
   createdAt: string
   updatedAt: string
   service: CleaningService
-  appointment?: Appointment | null
   user?: { id: string; firstName: string; lastName: string; email: string; phone: string | null } | null
 }
 
@@ -56,39 +38,24 @@ export type ContactMessage = {
   createdAt: string
 }
 
-export type AppointmentRecord = Appointment & {
-  quoteRequest: QuoteRequest
-}
-
 export type AdminReview = {
   id: string
   rating: number
   comment: string | null
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
-  appointment: {
-    quoteRequest: {
-      customerFirstName: string
-      customerLastName: string
-      service: CleaningService
-    }
-  }
+  customerName: string | null
+  user: { id: string; firstName: string; lastName: string; email: string } | null
 }
 
 export const quoteStatuses: QuoteStatus[] = [
   'PENDING',
-  'CONTACTED',
-  'QUOTED',
-  'ACCEPTED',
-  'DECLINED',
-  'COMPLETED',
+  'SENT',
+  'REJECTED',
 ]
 
 export const quoteTransitions: Record<QuoteStatus, QuoteStatus[]> = {
-  PENDING: ['CONTACTED', 'QUOTED', 'ACCEPTED', 'DECLINED', 'COMPLETED'],
-  CONTACTED: ['QUOTED', 'ACCEPTED', 'DECLINED', 'COMPLETED'],
-  QUOTED: ['ACCEPTED', 'DECLINED', 'COMPLETED'],
-  ACCEPTED: ['COMPLETED'],
-  DECLINED: [],
-  COMPLETED: [],
+  PENDING: ['SENT', 'REJECTED'],
+  SENT: ['PENDING', 'REJECTED'],
+  REJECTED: ['PENDING', 'SENT'],
 }

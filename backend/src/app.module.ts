@@ -7,7 +7,6 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { ServicesModule } from './modules/services/services.module.js';
 import { QuoteRequestsModule } from './modules/quote-requests/quote-requests.module.js';
-import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 import { ContactMessagesModule } from './modules/contact-messages/contact-messages.module.js';
 import { ReviewsModule } from './modules/reviews/reviews.module.js';
 
@@ -20,7 +19,6 @@ import { ReviewsModule } from './modules/reviews/reviews.module.js';
     UsersModule,
     ServicesModule,
     QuoteRequestsModule,
-    AppointmentsModule,
     ContactMessagesModule,
     ReviewsModule,
   ],

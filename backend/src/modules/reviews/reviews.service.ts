@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PartialType } from '@nestjs/mapped-types';
 import {
   IsEnum,
@@ -13,16 +8,10 @@ import {
   Max,
   MaxLength,
   Min,
-  IsUUID,
 } from 'class-validator';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { isPrismaUniqueConstraintError } from '../../prisma/prisma-errors.js';
-
-/** Review content is tied to a completed appointment and rated from one to five. */
+/** Independent review content rated from one to five. */
 export class CreateReviewDto {
-  @IsUUID()
-  appointmentId!: string;
-
   @IsInt()
   @Min(1)
   @Max(5)
@@ -52,8 +41,8 @@ export class ReviewsService {
       where: { status: 'APPROVED' },
       orderBy: { createdAt: 'desc' },
       include: {
-        appointment: {
-          include: { quoteRequest: { include: { service: true } } },
+        user: {
+          select: { firstName: true, lastName: true },
         },
       },
     });
@@ -64,70 +53,40 @@ export class ReviewsService {
     return this.prisma.review.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        appointment: {
-          include: { quoteRequest: { include: { service: true } } },
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
         },
       },
     });
   }
 
-  /** Verify ownership and completion, then create a pending review for moderation. */
+  /** Return only the authenticated customer's reviews. */
+  async findMine(userId: string) {
+    return this.prisma.review.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Create an independent pending review for the authenticated customer. */
   async create(dto: CreateReviewDto, userId: string) {
-    const appointment = await this.prisma.appointment.findUnique({
-      where: { id: dto.appointmentId },
-      select: {
-        id: true,
-        status: true,
-        quoteRequest: { select: { userId: true } },
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    return this.prisma.review.create({
+      data: {
+        userId,
+        customerName: `${user.firstName} ${user.lastName}`.trim(),
+        rating: dto.rating,
+        comment: dto.comment?.trim() || null,
+        status: 'PENDING',
       },
     });
-
-    if (!appointment) {
-      throw new NotFoundException('Appointment not found.');
-    }
-
-    if (appointment.quoteRequest.userId !== userId) {
-      throw new NotFoundException('Appointment not found.');
-    }
-    // Require completed work before a customer can provide a review.
-    if (appointment.status !== 'COMPLETED') {
-      throw new BadRequestException(
-        'Reviews can only be submitted for completed appointments.',
-      );
-    }
-
-    const existingReview = await this.prisma.review.findUnique({
-      where: { appointmentId: dto.appointmentId },
-    });
-
-    if (existingReview) {
-      throw new BadRequestException(
-        'A review already exists for this appointment.',
-      );
-    }
-
-    try {
-      return await this.prisma.review.create({
-        data: {
-          appointmentId: dto.appointmentId,
-          rating: dto.rating,
-          comment: dto.comment?.trim() || null,
-          status: 'PENDING',
-        },
-        include: {
-          appointment: {
-            include: { quoteRequest: { include: { service: true } } },
-          },
-        },
-      });
-    } catch (error) {
-      if (isPrismaUniqueConstraintError(error)) {
-        throw new ConflictException(
-          'A review already exists for this appointment.',
-        );
-      }
-      throw error;
-    }
   }
 
   /** Change an existing review's moderation status. */
@@ -141,8 +100,8 @@ export class ReviewsService {
       where: { id },
       data: { status: dto.status },
       include: {
-        appointment: {
-          include: { quoteRequest: { include: { service: true } } },
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
         },
       },
     });

@@ -47,8 +47,6 @@ describe('QuoteRequestsService', () => {
     city: ' Seattle ',
     state: ' WA ',
     postalCode: ' 98101 ',
-    preferredDate: '2026-12-01',
-    preferredTime: '09:30',
   };
 
   it('creates a pending quote with normalized values and the selected active service', async () => {
@@ -76,8 +74,6 @@ describe('QuoteRequestsService', () => {
         city: 'Seattle',
         state: 'WA',
         postalCode: '98101',
-        preferredDate: new Date('2026-12-01'),
-        preferredTime: new Date('1970-01-01T09:30:00.000Z'),
         notes: null,
         status: 'PENDING',
       },
@@ -148,21 +144,21 @@ describe('QuoteRequestsService', () => {
       })
       .mockResolvedValueOnce({
         id: 'quote-1',
-        status: 'DECLINED',
+        status: 'REJECTED',
       });
 
     await service.cancel('quote-1', 'user-1');
 
     expect(prisma.quoteRequest.updateMany).toHaveBeenCalledWith({
       where: { id: 'quote-1', status: 'PENDING' },
-      data: { status: 'DECLINED' },
+      data: { status: 'REJECTED' },
     });
   });
 
   it('rejects a disallowed administrator quote status transition', async () => {
     prisma.quoteRequest.findUnique.mockResolvedValue({
       id: 'quote-1',
-      status: 'COMPLETED',
+      status: 'PENDING',
     });
 
     await expect(
@@ -171,7 +167,7 @@ describe('QuoteRequestsService', () => {
     expect(prisma.quoteRequest.update).not.toHaveBeenCalled();
   });
 
-  it('does not allow customers to update statuses other than declining', async () => {
+  it('does not allow customers to update statuses through the admin operation', async () => {
     prisma.quoteRequest.findUnique.mockResolvedValue({
       id: 'quote-1',
       userId: 'user-1',
@@ -179,7 +175,7 @@ describe('QuoteRequestsService', () => {
     });
 
     await expect(
-      service.updateStatus('quote-1', { status: 'CONTACTED' }, 'user-1'),
+      service.updateStatus('quote-1', { status: 'SENT' }, 'user-1'),
     ).rejects.toThrow(UnauthorizedException);
   });
 

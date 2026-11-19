@@ -68,7 +68,6 @@ function prevReview() {
         <div class="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p class="font-semibold text-slate-900">{{ getPublicReviewerName(currentReview) }}</p>
-            <p class="text-sm text-slate-500">{{ currentReview.appointment.quoteRequest.service.name }}</p>
           </div>
           <div class="flex gap-2">
             <button v-for="(review, index) in reviews" :key="review.id" type="button" class="h-2.5 w-2.5 rounded-full transition" :class="activeIndex === index ? 'bg-primary' : 'bg-slate-300'" :aria-label="`Show review ${index + 1}`" :aria-current="activeIndex === index ? 'true' : 'false'" @click="activeIndex = index" />

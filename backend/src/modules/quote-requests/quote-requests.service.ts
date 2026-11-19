@@ -12,10 +12,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsDateString,
   IsInt,
   IsUUID,
-  Matches,
   MaxLength,
   Max,
   Min,
@@ -96,30 +94,14 @@ export class CreateQuoteRequestDto {
   postalCode!: string;
 
   @IsOptional()
-  @IsDateString({ strict: true })
-  preferredDate?: string;
-
-  @IsOptional()
-  @Matches(/^(?:[01]\d|2[0-3]):[0-5]\d$/)
-  preferredTime?: string;
-
-  @IsOptional()
   @IsString()
   @MaxLength(5000)
   notes?: string;
 }
 
 export class UpdateQuoteStatusDto {
-  @IsEnum([
-    'PENDING',
-    'CONTACTED',
-    'QUOTED',
-    'ACCEPTED',
-    'DECLINED',
-    'COMPLETED',
-  ])
-  status!:
-    'PENDING' | 'CONTACTED' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'COMPLETED';
+  @IsEnum(['PENDING', 'SENT', 'REJECTED'])
+  status!: 'PENDING' | 'SENT' | 'REJECTED';
 }
 
 export class UpdateQuoteRequestDto extends PartialType(CreateQuoteRequestDto) {}
@@ -142,7 +124,7 @@ export class QuoteRequestsService {
   async findOne(id: string, userId?: string, admin = false) {
     const quote = await this.prisma.quoteRequest.findUnique({
       where: { id },
-      include: { service: true, appointment: true },
+      include: { service: true },
     });
 
     if (!quote) {
@@ -159,19 +141,6 @@ export class QuoteRequestsService {
   /** Resolve an active service and persist a normalized guest or account quote. */
   async create(dto: CreateQuoteRequestDto, userId?: string) {
     const service = await this.resolveService(dto);
-    const preferredDate = dto.preferredDate
-      ? new Date(dto.preferredDate)
-      : null;
-    if (preferredDate && Number.isNaN(preferredDate.getTime())) {
-      throw new BadRequestException('Preferred date must be a valid date.');
-    }
-    const preferredTime = dto.preferredTime
-      ? new Date(`1970-01-01T${dto.preferredTime}:00.000Z`)
-      : null;
-    if (preferredTime && Number.isNaN(preferredTime.getTime())) {
-      throw new BadRequestException('Preferred time must be a valid time.');
-    }
-
     return this.prisma.quoteRequest.create({
       data: {
         userId: userId ?? null,
@@ -188,8 +157,6 @@ export class QuoteRequestsService {
         city: dto.city.trim(),
         state: dto.state.trim(),
         postalCode: dto.postalCode.trim(),
-        preferredDate,
-        preferredTime,
         notes: dto.notes?.trim() || null,
         status: 'PENDING',
       },
@@ -208,7 +175,7 @@ export class QuoteRequestsService {
       throw new NotFoundException('Quote request not found.');
     }
 
-    if (quote.status === 'DECLINED' || quote.status === 'COMPLETED') {
+    if (quote.status === 'REJECTED') {
       throw new BadRequestException(
         'This quote cannot be cancelled in its current status.',
       );
@@ -218,7 +185,7 @@ export class QuoteRequestsService {
     // concurrent transition performed by another request.
     const result = await this.prisma.quoteRequest.updateMany({
       where: { id, status: quote.status },
-      data: { status: 'DECLINED' },
+      data: { status: 'REJECTED' },
     });
     if (result.count === 0) {
       throw new BadRequestException(
@@ -247,22 +214,19 @@ export class QuoteRequestsService {
       throw new NotFoundException('Quote request not found.');
     }
 
-    // Keep allowed lifecycle transitions explicit instead of accepting any
-    // enum value as a valid next state.
-    const allowedTransitions: Record<string, string[]> = {
-      PENDING: ['CONTACTED', 'QUOTED', 'DECLINED', 'ACCEPTED', 'COMPLETED'],
-      CONTACTED: ['QUOTED', 'DECLINED', 'ACCEPTED', 'COMPLETED'],
-      QUOTED: ['ACCEPTED', 'DECLINED', 'COMPLETED'],
-      ACCEPTED: ['COMPLETED'],
-      DECLINED: [],
-      COMPLETED: [],
-    };
-
-    if (!admin && dto.status !== 'DECLINED') {
+    if (!admin) {
       throw new UnauthorizedException(
         'Only administrators can update quote status.',
       );
     }
+
+    // Keep allowed lifecycle transitions explicit instead of accepting any
+    // enum value as a valid next state.
+    const allowedTransitions: Record<string, string[]> = {
+      PENDING: ['SENT', 'REJECTED'],
+      SENT: ['PENDING', 'REJECTED'],
+      REJECTED: ['PENDING', 'SENT'],
+    };
 
     const currentStatus = quote.status;
     const validNext = allowedTransitions[currentStatus] ?? [];

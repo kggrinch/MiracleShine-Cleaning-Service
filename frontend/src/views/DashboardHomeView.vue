@@ -4,14 +4,13 @@ import { useRoute } from 'vue-router'
 import { ArrowRight, CalendarDays, ClipboardList, Mail, Sparkles } from 'lucide-vue-next'
 import api from '@/services/api'
 import { currentUser } from '@/services/auth'
-import type { AppointmentRecord, ContactMessage, QuoteRequest } from '@/services/portal'
+import type { ContactMessage, QuoteRequest } from '@/services/portal'
 import type { CleaningService } from '@/services/catalog'
 import { getApiErrorMessage } from '@/services/errors'
 
 const route = useRoute()
 const isAdmin = computed(() => currentUser.value?.role === 'ADMIN')
 const quotes = ref<QuoteRequest[]>([])
-const appointments = ref<AppointmentRecord[]>([])
 const messages = ref<ContactMessage[]>([])
 const services = ref<CleaningService[]>([])
 const loading = ref(true)
@@ -28,8 +27,8 @@ const metrics = computed(() =>
       ]
     : [
         { label: 'My quote requests', value: quotes.value.length, icon: ClipboardList, color: 'bg-sky-50 text-sky-700' },
-        { label: 'Open requests', value: quotes.value.filter((quote) => !['DECLINED', 'COMPLETED'].includes(quote.status)).length, icon: CalendarDays, color: 'bg-amber-50 text-amber-700' },
-        { label: 'Appointments', value: appointments.value.length, icon: Sparkles, color: 'bg-emerald-50 text-emerald-700' },
+        { label: 'Open requests', value: quotes.value.filter((quote) => quote.status !== 'REJECTED').length, icon: CalendarDays, color: 'bg-amber-50 text-amber-700' },
+        { label: 'Quotes sent', value: quotes.value.filter((quote) => quote.status === 'SENT').length, icon: Sparkles, color: 'bg-emerald-50 text-emerald-700' },
       ],
 )
 
@@ -47,12 +46,8 @@ async function load() {
       messages.value = messageResponse.data
       services.value = serviceResponse.data
     } else {
-      const [quoteResponse, appointmentResponse] = await Promise.all([
-        api.get<QuoteRequest[]>('/quote-requests/me'),
-        api.get<AppointmentRecord[]>('/appointments/me'),
-      ])
+      const quoteResponse = await api.get<QuoteRequest[]>('/quote-requests/me')
       quotes.value = quoteResponse.data
-      appointments.value = appointmentResponse.data
     }
   } catch (error) {
     loadError.value = getApiErrorMessage(error, 'Dashboard information could not be loaded.')
@@ -76,7 +71,7 @@ function formatDate(value: string) {
         {{ isQuoteList ? 'Your quote requests' : `Welcome, ${currentUser?.firstName}` }}
       </h1>
       <p class="mt-2 text-slate-600">
-        {{ isAdmin ? 'A live snapshot of activity from your service records.' : 'Follow your cleaning requests and appointments in one place.' }}
+        {{ isAdmin ? 'A live snapshot of activity from your service records.' : 'Follow your cleaning requests and their latest status.' }}
       </p>
     </header>
 
@@ -125,19 +120,6 @@ function formatDate(value: string) {
           {{ isAdmin ? 'No quote requests have been submitted yet.' : 'You have not submitted any quote requests yet.' }}
           <RouterLink v-if="!isAdmin" to="/get-quote" class="ml-1 font-semibold text-primary hover:underline">Request a quote</RouterLink>
         </p>
-      </section>
-
-      <section v-if="!isAdmin && appointments.length" class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-slate-900">Upcoming appointments</h2>
-          <RouterLink to="/account/appointments" class="text-sm font-semibold text-primary hover:underline">View all</RouterLink>
-        </div>
-        <div class="mt-4 grid gap-3 md:grid-cols-2">
-          <div v-for="appointment in appointments.slice(0, 2)" :key="appointment.id" class="rounded-2xl bg-slate-50 p-4">
-            <p class="font-semibold text-slate-900">{{ appointment.quoteRequest.service.name }}</p>
-            <p class="mt-1 text-sm text-slate-600">{{ formatDate(appointment.scheduledDate) }} · {{ appointment.status }}</p>
-          </div>
-        </div>
       </section>
 
       <section v-if="isAdmin" class="grid gap-4 md:grid-cols-2">

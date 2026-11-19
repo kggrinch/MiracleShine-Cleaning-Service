@@ -31,7 +31,7 @@ onMounted(async () => {
     <PageBanner
       eyebrow="Reviews"
       title="Trusted by clients who value reliability and polished results."
-      description="Approved customer feedback from completed Miracle Shine appointments."
+      description="Approved customer feedback about Miracle Shine Cleaning Service."
     />
 
     <div v-if="averageRating" class="mt-12 flex flex-col gap-6 rounded-[2.5rem] border border-slate-200 bg-slate-950 p-8 text-white sm:flex-row sm:items-center sm:justify-between lg:p-10">
@@ -68,7 +68,6 @@ onMounted(async () => {
         <p class="mt-5 text-[0.95rem] leading-7 text-slate-600">{{ review.comment || 'Thank you for sharing your feedback.' }}</p>
         <div class="mt-6 border-t border-slate-100 pt-5">
           <p class="font-semibold text-slate-900">{{ getPublicReviewerName(review) }}</p>
-          <p class="text-sm text-slate-500">{{ review.appointment.quoteRequest.service.name }}</p>
         </div>
       </article>
     </div>

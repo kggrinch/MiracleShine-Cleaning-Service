@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Building2, CalendarDays, ClipboardList, Home, LogOut, Mail, Settings, Sparkles, Star } from 'lucide-vue-next'
+import { Building2, ClipboardList, Home, LogOut, Mail, Settings, Sparkles, Star } from 'lucide-vue-next'
 import { currentUser, signOut } from '@/services/auth'
 
 const route = useRoute()
@@ -13,7 +13,6 @@ const navigation = computed(() =>
         { label: 'Overview', path: '/admin', icon: Home },
         { label: 'Quote requests', path: '/admin/quotes', icon: ClipboardList },
         { label: 'Services', path: '/admin/services', icon: Sparkles },
-        { label: 'Appointments', path: '/admin/appointments', icon: CalendarDays },
         { label: 'Contact messages', path: '/admin/messages', icon: Mail },
         { label: 'Reviews', path: '/admin/reviews', icon: Star },
         { label: 'Account settings', path: '/admin/settings', icon: Settings },
@@ -21,7 +20,7 @@ const navigation = computed(() =>
     : [
         { label: 'Overview', path: '/account', icon: Home },
         { label: 'My quote requests', path: '/account/quotes', icon: ClipboardList },
-        { label: 'Appointments', path: '/account/appointments', icon: CalendarDays },
+        { label: 'Reviews', path: '/account/reviews', icon: Star },
         { label: 'Account settings', path: '/account/settings', icon: Settings },
       ],
 )

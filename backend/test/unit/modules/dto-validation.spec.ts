@@ -29,7 +29,7 @@ describe('request DTO validation', () => {
 
   it('rejects a review rating outside the supported range', async () => {
     const dto = plainToInstance(CreateReviewDto, {
-      appointmentId: 'appointment-1',
+      quoteRequestId: 'quote-request-1',
       rating: 6,
     });
 

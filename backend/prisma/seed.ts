@@ -21,7 +21,6 @@ async function main() {
 
   // Delete dependents before the records they reference to satisfy foreign keys.
   await prisma.review.deleteMany();
-  await prisma.appointment.deleteMany();
   await prisma.contactMessage.deleteMany();
   await prisma.quoteRequest.deleteMany();
   await prisma.service.deleteMany();
@@ -170,10 +169,8 @@ async function main() {
       city: "Edmonds",
       state: "WA",
       postalCode: "98020",
-      preferredDate: new Date("2026-11-05T00:00:00.000Z"),
-      preferredTime: new Date("1970-01-01T10:00:00.000Z"),
       notes: "Please focus on the kitchen and bathrooms.",
-      status: "ACCEPTED",
+      status: "SENT",
     },
   });
 
@@ -191,8 +188,6 @@ async function main() {
       city: "Lynnwood",
       state: "WA",
       postalCode: "98036",
-      preferredDate: new Date("2026-11-07T00:00:00.000Z"),
-      preferredTime: new Date("1970-01-01T09:00:00.000Z"),
       notes: "Requesting a recurring commercial cleaning estimate.",
       status: "PENDING",
     },
@@ -215,30 +210,7 @@ async function main() {
       state: "WA",
       postalCode: "98043",
       notes: "Guest quote request without an account.",
-      status: "CONTACTED",
-    },
-  });
-
-  // Each quote can have at most one appointment in the data model.
-  const appointment1 = await prisma.appointment.create({
-    data: {
-      quoteRequestId: quote1.id,
-      scheduledDate: new Date("2026-11-05T00:00:00.000Z"),
-      startTime: new Date("1970-01-01T10:00:00.000Z"),
-      endTime: new Date("1970-01-01T12:00:00.000Z"),
-      status: "CONFIRMED",
-      notes: "Customer confirmed the requested time.",
-    },
-  });
-
-  await prisma.appointment.create({
-    data: {
-      quoteRequestId: quote2.id,
-      scheduledDate: new Date("2026-11-07T00:00:00.000Z"),
-      startTime: new Date("1970-01-01T09:00:00.000Z"),
-      endTime: new Date("1970-01-01T12:00:00.000Z"),
-      status: "REQUESTED",
-      notes: "Pending confirmation.",
+      status: "PENDING",
     },
   });
 
@@ -266,10 +238,10 @@ async function main() {
     },
   });
 
-  // Reviews are linked to completed-work examples and include a public approved review.
   await prisma.review.create({
     data: {
-      appointmentId: appointment1.id,
+      userId: customer1.id,
+      customerName: "Alex Morgan",
       rating: 5,
       comment: "The team was professional and thorough.",
       status: "APPROVED",
@@ -280,7 +252,6 @@ async function main() {
     users: await prisma.user.count(),
     services: await prisma.service.count(),
     quoteRequests: await prisma.quoteRequest.count(),
-    appointments: await prisma.appointment.count(),
     contactMessages: await prisma.contactMessage.count(),
     reviews: await prisma.review.count(),
     adminEmail: admin.email,

@@ -74,7 +74,6 @@ test.describe('Miracle Shine public and account experiences', () => {
     )
     await page.route('**/api/v1/auth/me', (route) => route.fulfill({ json: customer }))
     await page.route('**/api/v1/quote-requests/me', (route) => route.fulfill({ json: [] }))
-    await page.route('**/api/v1/appointments/me', (route) => route.fulfill({ json: [] }))
 
     await page.goto('/login')
     await page.getByLabel('Email').fill(customer.email)
