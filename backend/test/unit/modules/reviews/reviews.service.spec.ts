@@ -2,13 +2,13 @@ jest.mock('../../../../src/prisma/prisma.service.js', () => ({
   PrismaService: class PrismaService {},
 }));
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../../../src/prisma/prisma.service.js';
 import { ReviewsService } from '../../../../src/modules/reviews/reviews.service.js';
 
 const createPrismaMock = () => ({
-  appointment: { findUnique: jest.fn() },
+  user: { findUnique: jest.fn() },
   review: {
     findMany: jest.fn(),
     findUnique: jest.fn(),
@@ -31,9 +31,7 @@ describe('ReviewsService', () => {
 
   it('returns approved reviews only on the public listing', async () => {
     prisma.review.findMany.mockResolvedValue([]);
-
     await service.findPublicReviews();
-
     expect(prisma.review.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { status: 'APPROVED' },
@@ -42,79 +40,69 @@ describe('ReviewsService', () => {
     );
   });
 
-  it('creates a pending review for an existing appointment', async () => {
-    prisma.appointment.findUnique.mockResolvedValue({
-      id: 'appointment-1',
-      status: 'COMPLETED',
-      quoteRequest: { userId: 'user-1' },
+  it('creates independent pending reviews for the authenticated customer', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      firstName: 'Ava',
+      lastName: 'Smith',
     });
-    prisma.review.findUnique.mockResolvedValue(null);
     prisma.review.create.mockResolvedValue({ id: 'review-1' });
 
     await service.create(
-      {
-        appointmentId: 'appointment-1',
-        rating: 5,
-        comment: '  Excellent service. ',
-      },
+      { rating: 5, comment: '  Excellent service. ' },
       'user-1',
     );
+    await service.create({ rating: 4 }, 'user-1');
 
-    expect(prisma.review.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: {
-          appointmentId: 'appointment-1',
-          rating: 5,
-          comment: 'Excellent service.',
-          status: 'PENDING',
-        },
-      }),
+    expect(prisma.review.create).toHaveBeenCalledTimes(2);
+    expect(prisma.review.create).toHaveBeenNthCalledWith(1, {
+      data: {
+        userId: 'user-1',
+        customerName: 'Ava Smith',
+        rating: 5,
+        comment: 'Excellent service.',
+        status: 'PENDING',
+      },
+    });
+  });
+
+  it('returns only the authenticated customer review history', async () => {
+    prisma.review.findMany.mockResolvedValue([]);
+    await service.findMine('user-1');
+    expect(prisma.review.findMany).toHaveBeenCalledWith({
+      where: { userId: 'user-1' },
+      orderBy: { createdAt: 'desc' },
+    });
+  });
+
+  it('rejects review creation when the authenticated user no longer exists', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    await expect(service.create({ rating: 5 }, 'missing-user')).rejects.toThrow(
+      NotFoundException,
     );
-  });
-
-  it('rejects reviews for missing appointments and duplicate appointment reviews', async () => {
-    prisma.appointment.findUnique.mockResolvedValue(null);
-    await expect(
-      service.create({ appointmentId: 'missing', rating: 5 }, 'user-1'),
-    ).rejects.toThrow(NotFoundException);
-
-    prisma.appointment.findUnique.mockResolvedValue({
-      id: 'appointment-1',
-      status: 'COMPLETED',
-      quoteRequest: { userId: 'user-1' },
-    });
-    prisma.review.findUnique.mockResolvedValue({ id: 'existing-review' });
-    await expect(
-      service.create({ appointmentId: 'appointment-1', rating: 5 }, 'user-1'),
-    ).rejects.toThrow(BadRequestException);
-  });
-
-  it('rejects reviews from a different customer and for incomplete appointments', async () => {
-    prisma.appointment.findUnique.mockResolvedValue({
-      id: 'appointment-1',
-      status: 'COMPLETED',
-      quoteRequest: { userId: 'owner-1' },
-    });
-    await expect(
-      service.create({ appointmentId: 'appointment-1', rating: 5 }, 'user-2'),
-    ).rejects.toThrow(NotFoundException);
-
-    prisma.appointment.findUnique.mockResolvedValue({
-      id: 'appointment-1',
-      status: 'CONFIRMED',
-      quoteRequest: { userId: 'user-1' },
-    });
-    await expect(
-      service.create({ appointmentId: 'appointment-1', rating: 5 }, 'user-1'),
-    ).rejects.toThrow(BadRequestException);
   });
 
   it('reports missing reviews before status updates', async () => {
     prisma.review.findUnique.mockResolvedValue(null);
-
     await expect(
       service.updateStatus('missing', { status: 'APPROVED' }),
     ).rejects.toThrow(NotFoundException);
     expect(prisma.review.update).not.toHaveBeenCalled();
+  });
+
+  it('updates review moderation status', async () => {
+    prisma.review.findUnique.mockResolvedValue({ id: 'review-1' });
+    prisma.review.update.mockResolvedValue({
+      id: 'review-1',
+      status: 'APPROVED',
+    });
+
+    await service.updateStatus('review-1', { status: 'APPROVED' });
+
+    expect(prisma.review.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'review-1' },
+        data: { status: 'APPROVED' },
+      }),
+    );
   });
 });

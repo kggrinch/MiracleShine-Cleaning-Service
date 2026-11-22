@@ -28,7 +28,7 @@ export class ReviewsController {
     return this.reviewsService.findPublicReviews();
   }
 
-  /** POST /api/v1/reviews — submit a review for the caller's completed appointment. */
+  /** POST /api/v1/reviews — submit an independent review for the caller. */
   @Post()
   @UseGuards(AuthGuard)
   create(
@@ -36,6 +36,13 @@ export class ReviewsController {
     @Body() dto: CreateReviewDto,
   ) {
     return this.reviewsService.create(dto, req.user.id);
+  }
+
+  /** GET /api/v1/reviews/me — list the caller's own reviews. */
+  @Get('me')
+  @UseGuards(AuthGuard)
+  findMine(@Req() req: Request & { user: { id: string } }) {
+    return this.reviewsService.findMine(req.user.id);
   }
 }
 

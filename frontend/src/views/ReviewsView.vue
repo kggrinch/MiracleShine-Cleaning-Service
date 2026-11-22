@@ -68,7 +68,6 @@ onMounted(async () => {
         <p class="mt-5 text-[0.95rem] leading-7 text-slate-600">{{ review.comment || 'Thank you for sharing your feedback.' }}</p>
         <div class="mt-6 border-t border-slate-100 pt-5">
           <p class="font-semibold text-slate-900">{{ getPublicReviewerName(review) }}</p>
-          <p class="text-sm text-slate-500">{{ review.appointment.quoteRequest.service.name }}</p>
         </div>
       </article>
     </div>

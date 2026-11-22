@@ -57,7 +57,9 @@ function formatDate(value: string) {
       <article v-for="review in reviews" :key="review.id" class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p class="font-semibold text-slate-900">{{ review.appointment.quoteRequest.customerFirstName }} {{ review.appointment.quoteRequest.customerLastName }} · {{ review.appointment.quoteRequest.service.name }}</p>
+            <p class="font-semibold text-slate-900">
+              {{ review.customerName || (review.user ? `${review.user.firstName} ${review.user.lastName}` : 'Verified customer') }}
+            </p>
             <div class="mt-2 flex items-center gap-1 text-amber-500" :aria-label="`${review.rating} out of 5 stars`">
               <Star v-for="rating in 5" :key="rating" class="h-4 w-4" :class="rating <= review.rating ? 'fill-current' : ''" />
               <span class="ml-1 text-sm font-medium text-slate-600">{{ review.rating }}/5</span>

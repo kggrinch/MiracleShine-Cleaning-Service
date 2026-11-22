@@ -47,7 +47,7 @@ defineProps<{
         <div class="space-y-3 text-[0.95rem] text-slate-300">
           <p class="flex items-center gap-2">
             <CalendarCheck class="h-4 w-4 text-sky-300" />
-            Weekday, evening, and recurring appointments
+            Flexible weekday and recurring cleaning plans
           </p>
         </div>
       </div>

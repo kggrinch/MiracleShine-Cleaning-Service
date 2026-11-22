@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft, CalendarPlus, Mail, Phone } from 'lucide-vue-next'
+import { ArrowLeft, Mail, Phone } from 'lucide-vue-next'
 import api from '@/services/api'
 import { currentUser } from '@/services/auth'
 import { getApiErrorMessage } from '@/services/errors'
-import { quoteTransitions, type Appointment, type QuoteRequest, type QuoteStatus } from '@/services/portal'
+import { quoteTransitions, type QuoteRequest, type QuoteStatus } from '@/services/portal'
 
 const route = useRoute()
 const isAdmin = currentUser.value?.role === 'ADMIN'
@@ -14,9 +14,6 @@ const loading = ref(true)
 const saving = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
-const scheduleOpen = ref(false)
-const schedule = reactive({ scheduledDate: '', startTime: '', endTime: '', notes: '' })
-const minDate = new Date().toISOString().slice(0, 10)
 
 async function load() {
   loading.value = true
@@ -65,43 +62,11 @@ async function cancelQuote() {
   }
 }
 
-async function createAppointment() {
-  if (!quote.value || saving.value) return
-  errorMessage.value = ''
-  successMessage.value = ''
-  if (!schedule.scheduledDate || !schedule.startTime || !schedule.endTime || schedule.endTime <= schedule.startTime) {
-    errorMessage.value = 'Choose a date and a valid time range.'
-    return
-  }
-  saving.value = true
-  try {
-    const { data } = await api.post<Appointment>('/appointments', {
-      quoteRequestId: quote.value.id,
-      scheduledDate: schedule.scheduledDate,
-      startTime: schedule.startTime,
-      endTime: schedule.endTime,
-      ...(schedule.notes.trim() ? { notes: schedule.notes.trim() } : {}),
-    })
-    quote.value.appointment = data
-    scheduleOpen.value = false
-    successMessage.value = 'Appointment request submitted.'
-  } catch (error) {
-    errorMessage.value = getApiErrorMessage(error, 'Appointment could not be requested.')
-  } finally {
-    saving.value = false
-  }
-}
-
 function formatDate(value: string) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00`) : new Date(value)
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date)
 }
 
-function formatTime(value: string | null) {
-  if (!value) return 'Not specified'
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(date)
-}
 </script>
 
 <template>
@@ -129,7 +94,7 @@ function formatTime(value: string | null) {
               <option v-for="status in quoteTransitions[quote.status]" :key="status" :value="status">{{ status }}</option>
             </select>
           </label>
-          <button v-else-if="!isAdmin && !['DECLINED', 'COMPLETED'].includes(quote.status)" type="button" class="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" :disabled="saving" @click="cancelQuote">
+          <button v-else-if="!isAdmin && quote.status !== 'REJECTED'" type="button" class="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" :disabled="saving" @click="cancelQuote">
             Cancel request
           </button>
         </div>
@@ -144,8 +109,6 @@ function formatTime(value: string | null) {
             <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Email</dt><dd class="mt-1 break-all font-medium text-slate-800">{{ quote.customerEmail }}</dd></div>
             <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Phone</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.customerPhone || 'Not provided' }}</dd></div>
             <div class="sm:col-span-2"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Address</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.streetAddress }}, {{ quote.city }}, {{ quote.state }} {{ quote.postalCode }}</dd></div>
-            <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Preferred date</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.preferredDate ? formatDate(quote.preferredDate) : 'Not specified' }}</dd></div>
-            <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Preferred time</dt><dd class="mt-1 font-medium text-slate-800">{{ formatTime(quote.preferredTime) }}</dd></div>
             <div v-if="quote.squareFootage"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Square footage</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.squareFootage }}</dd></div>
             <div v-if="quote.bedrooms !== null"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Bedrooms</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.bedrooms }}</dd></div>
             <div v-if="quote.bathrooms !== null"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Bathrooms</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.bathrooms }}</dd></div>
@@ -157,42 +120,6 @@ function formatTime(value: string | null) {
           </div>
         </section>
 
-        <section class="h-fit rounded-3xl border border-slate-200 bg-white p-5 sm:p-7">
-          <div class="flex items-center justify-between gap-3">
-            <div><h2 class="text-lg font-semibold text-slate-900">Appointment</h2><p class="mt-1 text-sm text-slate-500">Scheduling linked to this request.</p></div>
-            <CalendarPlus class="h-5 w-5 text-primary" />
-          </div>
-          <div v-if="quote.appointment" class="mt-5 rounded-2xl bg-slate-50 p-4">
-            <p class="font-semibold text-slate-900">{{ formatDate(quote.appointment.scheduledDate) }}</p>
-            <p class="mt-1 text-sm text-slate-600">{{ formatTime(quote.appointment.startTime) }} – {{ formatTime(quote.appointment.endTime) }}</p>
-            <p class="mt-2 text-sm font-semibold text-primary">{{ quote.appointment.status }}</p>
-            <p v-if="quote.appointment.notes" class="mt-2 whitespace-pre-wrap text-sm text-slate-600">{{ quote.appointment.notes }}</p>
-          </div>
-          <template v-else-if="!isAdmin">
-            <p class="mt-5 text-sm leading-6 text-slate-600">Request a preferred appointment time for the team to review.</p>
-            <button type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-sky-50" @click="scheduleOpen = !scheduleOpen">
-              <CalendarPlus class="h-4 w-4" /> Request appointment
-            </button>
-            <form v-if="scheduleOpen" class="mt-4 space-y-3" @submit.prevent="createAppointment">
-              <label class="block text-sm font-medium text-slate-700">Date
-                <input v-model="schedule.scheduledDate" type="date" :min="minDate" required class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" />
-              </label>
-              <div class="grid grid-cols-2 gap-3">
-                <label class="block text-sm font-medium text-slate-700">Start
-                  <input v-model="schedule.startTime" type="time" required class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" />
-                </label>
-                <label class="block text-sm font-medium text-slate-700">End
-                  <input v-model="schedule.endTime" type="time" required class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" />
-                </label>
-              </div>
-              <label class="block text-sm font-medium text-slate-700">Notes <span class="font-normal text-slate-500">(optional)</span>
-                <textarea v-model="schedule.notes" maxlength="5000" rows="3" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5" />
-              </label>
-              <button type="submit" :disabled="saving" class="w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{{ saving ? 'Submitting…' : 'Submit appointment request' }}</button>
-            </form>
-          </template>
-          <p v-else class="mt-5 text-sm text-slate-600">No appointment has been requested yet.</p>
-        </section>
       </div>
     </template>
   </div>

@@ -58,7 +58,6 @@ import { Clock3, Mail, MapPin, Phone, Sparkles } from 'lucide-vue-next'
         <h3 class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">Business Hours</h3>
         <ul class="mt-4 space-y-3 text-sm text-slate-600">
           <li class="flex items-center gap-2"><Clock3 class="h-4 w-4 text-primary" /> Mon-Fri: 8:00 AM - 6:00 PM</li>
-          <li class="flex items-center gap-2"><Clock3 class="h-4 w-4 text-primary" /> Weekend: By appointment</li>
         </ul>
       </div>
     </div>

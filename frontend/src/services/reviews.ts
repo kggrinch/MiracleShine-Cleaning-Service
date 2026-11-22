@@ -5,12 +5,8 @@ export type PublicReview = {
   rating: number
   comment: string | null
   createdAt: string
-  appointment: {
-    quoteRequest: {
-      customerFirstName: string
-      service: { name: string }
-    }
-  }
+  customerName: string | null
+  user: { firstName: string; lastName: string } | null
 }
 
 export async function fetchPublicReviews(): Promise<PublicReview[]> {
@@ -19,6 +15,8 @@ export async function fetchPublicReviews(): Promise<PublicReview[]> {
 }
 
 export function getPublicReviewerName(review: PublicReview): string {
-  const firstName = review.appointment.quoteRequest.customerFirstName.trim()
+  const name = review.customerName?.trim()
+  if (name) return `${name.charAt(0)}.`
+  const firstName = review.user?.firstName?.trim()
   return firstName ? `${firstName.charAt(0)}.` : 'Verified customer'
 }
