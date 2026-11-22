@@ -145,11 +145,11 @@ function resetForm() {
 </script>
 
 <template>
-  <section id="quote" class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
+  <section id="quote" class="mx-auto max-w-7xl px-0 py-12 sm:px-6 sm:py-16 lg:px-8">
     <div
-      class="grid gap-8 rounded-[2.5rem] border border-slate-200 bg-slate-950 p-8 text-white shadow-[0_24px_80px_-28px_rgba(2,8,23,0.65)] lg:grid-cols-[0.9fr_1.1fr] lg:p-12"
+      class="grid min-w-0 gap-8 rounded-[2.5rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_24px_80px_-28px_rgba(2,8,23,0.65)] sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:p-12"
     >
-      <div class="flex flex-col justify-center">
+      <div class="flex min-w-0 flex-col justify-center">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-sky-300">Free quote</p>
         <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
           Get your free cleaning quote today.
@@ -160,19 +160,19 @@ function resetForm() {
         </p>
 
         <div class="mt-8 space-y-4">
-          <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4">
-            <Phone class="h-5 w-5 text-sky-300" />
+          <div class="flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4">
+            <Phone class="h-5 w-5 shrink-0 text-sky-300" />
             <span>(425) 555-1234</span>
           </div>
-          <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4">
-            <Mail class="h-5 w-5 text-sky-300" />
-            <span>info@miracleshinecleaning.com</span>
+          <div class="flex min-w-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4">
+            <Mail class="h-5 w-5 shrink-0 text-sky-300" />
+            <span class="min-w-0 break-all">info@miracleshinecleaning.com</span>
           </div>
         </div>
       </div>
 
       <form
-        class="rounded-[2rem] bg-white p-6 text-slate-900 shadow-xl shadow-black/10 sm:p-8"
+        class="w-full min-w-0 rounded-[2rem] bg-white p-4 text-slate-900 shadow-xl shadow-black/10 sm:p-8"
         :aria-busy="isSubmitting"
         @submit.prevent="onSubmit"
         novalidate
@@ -187,7 +187,7 @@ function resetForm() {
             <CircleCheck class="h-8 w-8" />
           </div>
           <h3 class="text-2xl font-semibold text-slate-900">Request received</h3>
-          <p class="max-w-md text-slate-600">
+          <p class="max-w-md text-slate-700">
             Thanks, {{ form.firstName || 'there' }}! We've received your details and will follow up
             with a tailored estimate shortly.
           </p>
@@ -203,7 +203,7 @@ function resetForm() {
         <template v-else>
           <div class="grid gap-4 md:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-first-name">
+              <label class="block text-base font-medium text-slate-700" for="quote-first-name">
                 First Name
                 <input
                   id="quote-first-name"
@@ -211,8 +211,8 @@ function resetForm() {
                   type="text"
                   maxlength="100"
                   autocomplete="given-name"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
-                  :class="errors.firstName ? 'border-red-300 focus:border-red-400' : ''"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
+                  :class="errors.firstName ? 'border-red-500 focus:border-red-600' : ''"
                   placeholder="Jordan"
                 />
               </label>
@@ -221,7 +221,7 @@ function resetForm() {
               </p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-last-name">
+              <label class="block text-base font-medium text-slate-700" for="quote-last-name">
                 Last Name
                 <input
                   id="quote-last-name"
@@ -229,8 +229,8 @@ function resetForm() {
                   type="text"
                   maxlength="100"
                   autocomplete="family-name"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
-                  :class="errors.lastName ? 'border-red-300 focus:border-red-400' : ''"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
+                  :class="errors.lastName ? 'border-red-500 focus:border-red-600' : ''"
                   placeholder="Lee"
                 />
               </label>
@@ -239,7 +239,7 @@ function resetForm() {
               </p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-phone">
+              <label class="block text-base font-medium text-slate-700" for="quote-phone">
                 Phone <span class="font-normal text-slate-500">(optional)</span>
                 <input
                   id="quote-phone"
@@ -247,8 +247,8 @@ function resetForm() {
                   type="tel"
                   maxlength="30"
                   autocomplete="tel"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
-                  :class="errors.phone ? 'border-red-300 focus:border-red-400' : ''"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
+                  :class="errors.phone ? 'border-red-500 focus:border-red-600' : ''"
                   placeholder="(555) 123-4567"
                 />
               </label>
@@ -257,15 +257,15 @@ function resetForm() {
               </p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-email">
+              <label class="block text-base font-medium text-slate-700" for="quote-email">
                 Email
                 <input
                   id="quote-email"
                   v-model="form.email"
                   type="email"
                   autocomplete="email"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
-                  :class="errors.email ? 'border-red-300 focus:border-red-400' : ''"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
+                  :class="errors.email ? 'border-red-500 focus:border-red-600' : ''"
                   placeholder="you@example.com"
                 />
               </label>
@@ -277,7 +277,7 @@ function resetForm() {
 
           <div class="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-address">
+              <label class="block text-base font-medium text-slate-700" for="quote-address">
                 Address
                 <input
                   id="quote-address"
@@ -286,8 +286,8 @@ function resetForm() {
                   minlength="3"
                   maxlength="255"
                   autocomplete="street-address"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
-                  :class="errors.address ? 'border-red-300 focus:border-red-400' : ''"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
+                  :class="errors.address ? 'border-red-500 focus:border-red-600' : ''"
                   placeholder="123 Main Street"
                 />
               </label>
@@ -296,14 +296,14 @@ function resetForm() {
               </p>
             </div>
 
-            <label class="block text-sm font-medium text-slate-700" for="quote-service">
+            <label class="block text-base font-medium text-slate-700" for="quote-service">
               Cleaning Type
               <select
                 id="quote-service"
                 v-model="form.serviceId"
                 required
                 :disabled="isLoadingServices || services.length === 0"
-                class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
+                class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
               >
                 <option value="" disabled>{{ isLoadingServices ? 'Loading services…' : 'Choose a service' }}</option>
                 <option v-for="service in services" :key="service.id" :value="service.id">
@@ -314,12 +314,12 @@ function resetForm() {
           </div>
 
           <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <label class="block text-sm font-medium text-slate-700" for="quote-property-type">
+            <label class="block text-base font-medium text-slate-700" for="quote-property-type">
               Property Type
               <select
                 id="quote-property-type"
                 v-model="form.propertyType"
-                class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
+                class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
               >
                 <option value="HOUSE">House</option>
                 <option value="APARTMENT">Apartment</option>
@@ -328,7 +328,7 @@ function resetForm() {
               </select>
             </label>
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-city">
+              <label class="block text-base font-medium text-slate-700" for="quote-city">
                 City
                 <input
                   id="quote-city"
@@ -337,14 +337,14 @@ function resetForm() {
                   minlength="2"
                   maxlength="100"
                   autocomplete="address-level2"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
                   placeholder="Seattle"
                 />
               </label>
               <p v-if="errors.city" class="text-sm text-red-600" role="alert">{{ errors.city }}</p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-state">
+              <label class="block text-base font-medium text-slate-700" for="quote-state">
                 State
                 <input
                   id="quote-state"
@@ -353,7 +353,7 @@ function resetForm() {
                   minlength="2"
                   maxlength="100"
                   autocomplete="address-level1"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
                   placeholder="WA"
                 />
               </label>
@@ -362,7 +362,7 @@ function resetForm() {
               </p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700" for="quote-postal-code">
+              <label class="block text-base font-medium text-slate-700" for="quote-postal-code">
                 ZIP / Postal Code
                 <input
                   id="quote-postal-code"
@@ -371,7 +371,7 @@ function resetForm() {
                   minlength="3"
                   maxlength="20"
                   autocomplete="postal-code"
-                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
+                  class="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
                   placeholder="98101"
                 />
               </label>
@@ -381,14 +381,14 @@ function resetForm() {
             </div>
           </div>
 
-          <label class="mt-4 block text-sm font-medium text-slate-700" for="quote-message">
+          <label class="mt-4 block text-base font-medium text-slate-700" for="quote-message">
             Message
             <textarea
               id="quote-message"
               v-model="form.message"
               maxlength="5000"
-              class="mt-2 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-primary"
-              :class="errors.message ? 'border-red-300 focus:border-red-400' : ''"
+              class="mt-2 min-h-28 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200"
+              :class="errors.message ? 'border-red-500 focus:border-red-600' : ''"
               placeholder="Tell us about your space and scheduling needs."
             />
           </label>
@@ -404,7 +404,7 @@ function resetForm() {
             :disabled="isSubmitting"
             class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 font-semibold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-primary-dark disabled:cursor-wait disabled:opacity-60"
           >
-            {{ isSubmitting ? 'Submitting…' : 'Request Quote' }}
+            {{ isSubmitting ? 'Submitting…' : 'Request a Quote' }}
             <Send v-if="!isSubmitting" class="h-4 w-4" />
           </button>
         </template>

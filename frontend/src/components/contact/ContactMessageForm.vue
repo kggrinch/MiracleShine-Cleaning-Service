@@ -47,7 +47,7 @@ async function submit() {
     <div class="mx-auto max-w-3xl">
       <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Have a question?</p>
       <h2 class="mt-2 text-2xl font-semibold text-slate-900">Send our team a message</h2>
-      <p class="mt-2 text-sm leading-6 text-slate-600">This form stores your message for the team. It does not send an immediate email reply.</p>
+      <p class="mt-2 text-base leading-7 text-slate-700">This form stores your message for the team. It does not send an immediate email reply.</p>
 
       <div v-if="submitted" class="mt-6 flex items-start gap-3 rounded-2xl bg-emerald-50 p-5 text-emerald-900" role="status">
         <CircleCheck class="mt-0.5 h-5 w-5 shrink-0" />
@@ -58,24 +58,24 @@ async function submit() {
       </div>
       <form v-else class="mt-6 space-y-4" novalidate @submit.prevent="submit">
         <div class="grid gap-4 sm:grid-cols-2">
-          <label class="text-sm font-medium text-slate-700">Name
-            <input v-model="form.customerName" maxlength="200" required class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" />
+          <label class="text-base font-medium text-slate-700">Name
+            <input v-model="form.customerName" maxlength="200" required class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200" />
           </label>
-          <label class="text-sm font-medium text-slate-700">Email
-            <input v-model="form.email" type="email" required autocomplete="email" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" />
+          <label class="text-base font-medium text-slate-700">Email
+            <input v-model="form.email" type="email" required autocomplete="email" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200" />
           </label>
-          <label class="text-sm font-medium text-slate-700">Phone <span class="font-normal text-slate-500">(optional)</span>
-            <input v-model="form.phone" type="tel" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" />
+          <label class="text-base font-medium text-slate-700">Phone <span class="font-normal text-slate-500">(optional)</span>
+            <input v-model="form.phone" type="tel" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200" />
           </label>
-          <label class="text-sm font-medium text-slate-700">Subject
-            <input v-model="form.subject" maxlength="200" required class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" />
+          <label class="text-base font-medium text-slate-700">Subject
+            <input v-model="form.subject" maxlength="200" required class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200" />
           </label>
         </div>
-        <label class="block text-sm font-medium text-slate-700">Message
-          <textarea v-model="form.message" maxlength="5000" minlength="10" required rows="5" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" />
+        <label class="block text-base font-medium text-slate-700">Message
+          <textarea v-model="form.message" maxlength="5000" minlength="10" required rows="5" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-primary focus:ring-2 focus:ring-sky-200" />
         </label>
         <p v-if="errorMessage" class="rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert">{{ errorMessage }}</p>
-        <button type="submit" :disabled="loading" class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+        <button type="submit" :disabled="loading" class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-white transition hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60">
           {{ loading ? 'Sending…' : 'Send message' }} <Send class="h-4 w-4" />
         </button>
       </form>
