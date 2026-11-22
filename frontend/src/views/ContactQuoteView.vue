@@ -23,7 +23,7 @@ const content = computed(() => {
       ? 'Get a free, tailored cleaning estimate.'
       : "Let's make your space shine.",
     description: isQuote
-      ? "Tell us about your property, preferred service, and schedule. We'll follow up with a thoughtful recommendation and a clear, upfront estimate - no pressure."
+      ? "Tell us about your property, preferred service, and schedule. We'll follow up with a thoughtful recommendation and a clear, upfront estimate—no pressure."
       : 'Reach out for a personalized estimate, a same-week consultation, or a custom cleaning plan built around your priorities.',
   }
 })

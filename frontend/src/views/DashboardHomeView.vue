@@ -66,7 +66,7 @@ function formatDate(value: string) {
 <template>
   <div class="space-y-6">
     <header>
-      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">{{ isAdmin ? 'Business overview' : 'Your Miracle Shine account' }}</p>
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">{{ isAdmin ? 'Business overview' : 'Your MiracleShine Cleaning Service account' }}</p>
       <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
         {{ isQuoteList ? 'Your quote requests' : `Welcome, ${currentUser?.firstName}` }}
       </h1>

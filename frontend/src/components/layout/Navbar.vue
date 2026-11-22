@@ -36,7 +36,7 @@ watch(
 // Shared underline-animated styles for the desktop nav links.
 const desktopLinkClass =
   'after:absolute after:-bottom-1.5 after:left-0 after:h-[2px] after:w-full after:origin-left after:rounded-full ' +
-  'after:bg-primary after:transition-transform after:duration-300 relative text-sm font-medium text-slate-700 ' +
+  'after:bg-primary after:transition-transform after:duration-300 relative text-[15px] font-medium text-slate-700 ' +
   'transition-colors duration-200 hover:text-primary'
 const desktopLinkIdle = 'after:scale-x-0 hover:after:scale-x-100'
 const desktopLinkActive = 'text-primary after:scale-x-100'
@@ -44,17 +44,17 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
 
 <template>
   <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
-      <RouterLink to="/" class="group flex items-center gap-3" aria-label="Miracle Shine Cleaning Service - Home">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-2 lg:px-8">
+      <RouterLink to="/" class="group flex min-w-0 items-center" aria-label="MiracleShine Cleaning Service - Home">
         <img
-          src="/m_logo.png"
-          alt="Miracle Shine Cleaning"
-          class="h-12 w-40 rounded-xl object-cover object-[center_50%] shadow-sm transition-transform duration-300 group-hover:scale-105"
+          src="/miracleshine-cleaning-service-modernized.svg"
+          alt="MiracleShine Cleaning Service"
+          class="h-auto w-44 max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.02] sm:w-48 lg:w-40 xl:w-56"
         />
       </RouterLink>
 
             <!-- Desktop nav -->
-      <nav class="hidden items-center gap-8 lg:flex" aria-label="Primary">
+      <nav class="hidden items-center gap-4 lg:flex xl:gap-6" aria-label="Primary">
         <RouterLink
           v-for="link in links"
           :key="link.name"
@@ -66,7 +66,7 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
         </RouterLink>
       </nav>
 
-      <div class="hidden items-center gap-3 lg:flex">
+      <div class="hidden items-center gap-2 lg:flex xl:gap-3">
         <template v-if="currentUser">
           <RouterLink
             :to="currentUser.role === 'ADMIN' ? '/admin' : '/account'"
@@ -78,12 +78,12 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
             <LogOut class="h-4 w-4" /> Sign out
           </button>
         </template>
-        <RouterLink v-else to="/login" class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-primary">
+        <RouterLink v-else to="/login" class="inline-flex items-center gap-2 text-[15px] font-medium text-slate-700 hover:text-primary">
           <LogIn class="h-4 w-4" /> Sign in
         </RouterLink>
         <a
           href="tel:4255551234"
-          class="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition duration-300 hover:-translate-y-0.5 hover:border-primary hover:text-primary"
+          class="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-[15px] font-medium text-slate-700 transition duration-300 hover:-translate-y-0.5 hover:border-primary hover:text-primary"
         >
           <Phone class="h-4 w-4" />
           (425) 555-1234
@@ -114,7 +114,7 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
             v-for="link in links"
             :key="link.name"
             :to="link.to"
-            class="rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
+            class="rounded-2xl px-3 py-2.5 text-base font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
             active-class="bg-sky-50 text-primary font-semibold"
             @click="mobileMenuOpen = false"
           >
@@ -131,7 +131,7 @@ const desktopLinkActive = 'text-primary after:scale-x-100'
                     <RouterLink
                       v-else
                       to="/login"
-                      class="rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
+                      class="rounded-2xl px-3 py-2.5 text-base font-medium text-slate-700 transition hover:bg-slate-50 hover:text-primary"
                     >
                       Customer sign in
                     </RouterLink>

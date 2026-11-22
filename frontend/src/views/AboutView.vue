@@ -28,7 +28,7 @@ const values: Value[] = [
   },
   {
     title: 'Reliable standards',
-    description: 'Consistent, dependable service you can count on - visit after visit, without surprises.',
+    description: 'Consistent, dependable service you can count on, visit after visit, without surprises.',
     icon: ShieldCheck,
   },
   {
@@ -47,9 +47,10 @@ const values: Value[] = [
 <template>
   <section class="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-8">
     <PageBanner
+      class="about-page-banner"
       eyebrow="About us"
       title="A local cleaning company built on trust, consistency, and care."
-      description="Miracle Shine Cleaning Service exists to give busy families and successful businesses the gift of a space that feels genuinely refreshed - handled with respect and finished with pride."
+      description="MiracleShine Cleaning Service gives busy families and successful businesses the gift of a genuinely refreshed space, handled with respect and finished with pride."
     />
 
     <div class="mt-12 grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
@@ -66,10 +67,10 @@ const values: Value[] = [
         <h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
           We bring order, polish, and peace of mind to every visit.
         </h2>
-        <p class="mt-5 text-lg leading-8 text-slate-600">
-          Miracle Shine was founded on a simple belief: a truly well-kept space can change the way a home feels and the way a business operates. We combine professional training with a genuine, personal approach so every job is finished to a standard we'd be proud to stand behind.
+        <p class="mt-5 text-lg leading-8 text-slate-700">
+          MiracleShine Cleaning Service was founded on a simple belief: a truly well-kept space can change the way a home feels and the way a business operates. We combine professional training with a genuine, personal approach so every job is finished to a standard we'd be proud to stand behind.
         </p>
-        <p class="mt-4 text-lg leading-8 text-slate-600">
+        <p class="mt-4 text-lg leading-8 text-slate-700">
           Whether it's a daily office refresh or a thorough move-out reset, we show up on time, respect your space, and never stop until the details are right.
         </p>
 
@@ -79,14 +80,14 @@ const values: Value[] = [
               <ShieldCheck class="h-5 w-5" />
               <span class="font-semibold text-slate-900">Trained professionals</span>
             </div>
-            <p class="mt-2 text-sm leading-7 text-slate-600">Polished results delivered with a calm, respectful approach.</p>
+            <p class="mt-2 text-[0.95rem] leading-7 text-slate-700">Polished results delivered with a calm, respectful approach.</p>
           </div>
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div class="flex items-center gap-2 text-primary">
               <HeartHandshake class="h-5 w-5" />
               <span class="font-semibold text-slate-900">Built on relationships</span>
             </div>
-            <p class="mt-2 text-sm leading-7 text-slate-600">Many clients start with us and stay for years of dependable care.</p>
+            <p class="mt-2 text-[0.95rem] leading-7 text-slate-700">Many clients start with us and stay for years of dependable care.</p>
           </div>
         </div>
       </div>
@@ -103,7 +104,7 @@ const values: Value[] = [
       <div class="max-w-2xl">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-primary">What we stand for</p>
         <h2 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          Why customers choose Miracle Shine, again and again.
+          Why customers choose MiracleShine Cleaning Service again and again.
         </h2>
       </div>
 
@@ -117,16 +118,17 @@ const values: Value[] = [
             <component :is="value.icon" class="h-6 w-6" />
           </div>
           <h3 class="mt-5 text-xl font-semibold text-slate-900">{{ value.title }}</h3>
-          <p class="mt-3 text-[0.95rem] leading-7 text-slate-600">{{ value.description }}</p>
+          <p class="mt-3 text-[0.95rem] leading-7 text-slate-700">{{ value.description }}</p>
         </article>
       </div>
     </div>
 
     <div class="mt-16 sm:mt-20">
       <PageBanner
+        class="about-page-banner"
         eyebrow="See the difference"
         title="Experience a space that's cleaned with genuine care."
-        description="Tell us about your home or business and we'll put together a tailored plan that fits your schedule and standards."
+        description="Tell us about your home or business, and we'll put together a tailored plan that fits your schedule and standards."
       >
         <RouterLink
           to="/get-quote"
@@ -139,3 +141,9 @@ const values: Value[] = [
     </div>
   </section>
 </template>
+
+<style scoped>
+.about-page-banner :deep(p.text-lg) {
+  color: #334155;
+}
+</style>
