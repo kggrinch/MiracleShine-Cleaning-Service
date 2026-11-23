@@ -14,7 +14,7 @@ NestJS REST API for the MiracleShine website.
 ## Modules
 
 - `auth`: registration, login, current-user lookup, optional authentication, and role guards
-- `users`: customer profile operations and protected administrator provisioning
+- `users`: account profile/password changes and protected administrator provisioning
 - `services`: public catalog and administrator catalog management
 - `quote-requests`: quote submission, ownership, cancellation, and lifecycle status
 - `contact-messages`: website submissions and administrator handling
@@ -43,6 +43,16 @@ Copy `.env.example` to `.env` and configure:
 - `JWT_SECRET`
 
 `JWT_SECRET` must be at least 32 bytes and must not use the placeholder value.
+
+## Change password
+
+`PATCH /api/v1/users/me/password` requires the caller's bearer JWT and accepts
+`currentPassword`, `newPassword`, and `confirmNewPassword`. The account ID comes
+from the verified token; customers must choose a password of at least 8
+characters and administrators at least 12. New passwords are bcrypt-hashed
+before the existing `users.password_hash` field is updated. Password changes
+do not revoke existing JWTs; sessions remain valid until their one-hour token
+expiration.
 
 For local Docker development:
 

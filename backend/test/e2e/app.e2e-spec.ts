@@ -6,6 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import type { Server } from 'node:http';
 import request from 'supertest';
+import bcrypt from 'bcrypt';
 import { AppModule } from '../../src/app.module.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
 import { AuthService } from '../../src/modules/auth/auth.service.js';
@@ -42,6 +43,14 @@ describe('AppController (e2e)', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'e2e-test-jwt-secret-that-is-at-least-32-bytes';
+    const initialPasswords = new Map([
+      ['admin-1', 'AdminCurrentPassword123'],
+      ['customer-1', 'CustomerCurrentPassword123'],
+    ]);
+    for (const [id, user] of usersById) {
+      user.passwordHash = await bcrypt.hash(initialPasswords.get(id)!, 4);
+    }
+
     const prismaMock = {
       $connect: jest.fn(),
       $disconnect: jest.fn(),
@@ -67,6 +76,15 @@ describe('AppController (e2e)', () => {
           usersById.set(String(user.id), user);
           return Promise.resolve(user);
         }),
+        update: jest.fn(
+          (args: { where: { id: string }; data: Record<string, unknown> }) => {
+            const existing = usersById.get(args.where.id);
+            if (!existing) return Promise.resolve(null);
+            const user = { ...existing, ...args.data, updatedAt: new Date() };
+            usersById.set(args.where.id, user);
+            return Promise.resolve(user);
+          },
+        ),
       },
     };
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -178,5 +196,119 @@ describe('AppController (e2e)', () => {
     const responseBody = response.body as { user: { role: string } };
     expect(responseBody.user.role).toBe('CUSTOMER');
     expect(JSON.stringify(response.body)).not.toContain('passwordHash');
+  });
+
+  it('changes customer and administrator passwords only for the authenticated account', async () => {
+    const customerToken = authService.issueToken('customer-1');
+    const customerResponse = await request(app.getHttpServer() as Server)
+      .patch('/api/v1/users/me/password')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({
+        userId: 'admin-1',
+        currentPassword: 'CustomerCurrentPassword123',
+        newPassword: 'CustomerNewPassword123',
+        confirmNewPassword: 'CustomerNewPassword123',
+      })
+      .expect(200);
+
+    expect(customerResponse.body).toEqual({
+      message: 'Password changed successfully.',
+    });
+    expect(JSON.stringify(customerResponse.body)).not.toMatch(
+      /passwordHash|CustomerNewPassword123/,
+    );
+    await request(app.getHttpServer() as Server)
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .expect(200);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'customer@example.com',
+        password: 'CustomerNewPassword123',
+      })
+      .expect(201);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'initial@example.com',
+        password: 'AdminCurrentPassword123',
+      })
+      .expect(201);
+
+    const adminToken = authService.issueToken('admin-1');
+    await request(app.getHttpServer() as Server)
+      .patch('/api/v1/users/me/password')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        currentPassword: 'AdminCurrentPassword123',
+        newPassword: 'AdminNewPassword123',
+        confirmNewPassword: 'AdminNewPassword123',
+      })
+      .expect(200);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'initial@example.com',
+        password: 'AdminNewPassword123',
+      })
+      .expect(201);
+  });
+
+  it('rejects unauthenticated, incomplete, weak, or incorrect-current-password changes', async () => {
+    const endpoint = request(app.getHttpServer() as Server).patch(
+      '/api/v1/users/me/password',
+    );
+    await endpoint
+      .send({
+        currentPassword: 'CustomerNewPassword123',
+        newPassword: 'AnotherNewPassword123',
+        confirmNewPassword: 'AnotherNewPassword123',
+      })
+      .expect(401);
+
+    const customerToken = authService.issueToken('customer-1');
+    await request(app.getHttpServer() as Server)
+      .patch('/api/v1/users/me/password')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({})
+      .expect(400);
+    await request(app.getHttpServer() as Server)
+      .patch('/api/v1/users/me/password')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({
+        currentPassword: 'CustomerNewPassword123',
+        newPassword: 'short',
+        confirmNewPassword: 'short',
+      })
+      .expect(400);
+    await request(app.getHttpServer() as Server)
+      .patch('/api/v1/users/me/password')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({
+        currentPassword: 'IncorrectCurrentPassword',
+        newPassword: 'AnotherNewPassword123',
+        confirmNewPassword: 'AnotherNewPassword123',
+      })
+      .expect(400);
+
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'customer@example.com',
+        password: 'CustomerNewPassword123',
+      })
+      .expect(201);
+
+    const adminToken = authService.issueToken('admin-1');
+    await request(app.getHttpServer() as Server)
+      .patch('/api/v1/users/me/password')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        currentPassword: 'AdminNewPassword123',
+        newPassword: 'NewPass1',
+        confirmNewPassword: 'NewPass1',
+      })
+      .expect(400);
   });
 });

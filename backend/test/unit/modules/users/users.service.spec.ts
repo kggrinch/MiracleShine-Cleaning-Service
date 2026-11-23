@@ -2,7 +2,12 @@ jest.mock('../../../../src/prisma/prisma.service.js', () => ({
   PrismaService: class PrismaService {},
 }));
 
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import bcrypt from 'bcrypt';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../../../src/prisma/prisma.service.js';
 import { UsersService } from '../../../../src/modules/users/users.service.js';
@@ -114,16 +119,107 @@ describe('UsersService', () => {
     });
   });
 
+  it('changes the authenticated user password using a new bcrypt hash', async () => {
+    const currentHash = await bcrypt.hash('CurrentPassword123', 4);
+    let updatedUserId = '';
+    let updatedPasswordHash = '';
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      passwordHash: currentHash,
+      isActive: true,
+    });
+    prisma.user.update.mockImplementation(
+      (args: { where: { id: string }; data: Record<string, unknown> }) => {
+        updatedUserId = args.where.id;
+        updatedPasswordHash = String(args.data.passwordHash);
+        return Promise.resolve({ id: updatedUserId });
+      },
+    );
+
+    await expect(
+      service.changePassword(
+        'user-1',
+        {
+          currentPassword: 'CurrentPassword123',
+          newPassword: 'NewPassword123',
+          confirmNewPassword: 'NewPassword123',
+        },
+        'CUSTOMER',
+      ),
+    ).resolves.toEqual({ message: 'Password changed successfully.' });
+
+    expect(updatedUserId).toBe('user-1');
+    expect(updatedPasswordHash).not.toBe('NewPassword123');
+    expect(updatedPasswordHash).not.toContain('CurrentPassword123');
+    expect(await bcrypt.compare('NewPassword123', updatedPasswordHash)).toBe(
+      true,
+    );
+  });
+
+  it('rejects an incorrect current password, a reused password, and mismatched confirmation', async () => {
+    const currentHash = await bcrypt.hash('CurrentPassword123', 4);
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      passwordHash: currentHash,
+      isActive: true,
+    });
+
+    await expect(
+      service.changePassword(
+        'user-1',
+        {
+          currentPassword: 'WrongPassword123',
+          newPassword: 'NewPassword123',
+          confirmNewPassword: 'NewPassword123',
+        },
+        'CUSTOMER',
+      ),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.changePassword(
+        'user-1',
+        {
+          currentPassword: 'CurrentPassword123',
+          newPassword: 'CurrentPassword123',
+          confirmNewPassword: 'CurrentPassword123',
+        },
+        'CUSTOMER',
+      ),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.changePassword(
+        'user-1',
+        {
+          currentPassword: 'CurrentPassword123',
+          newPassword: 'NewPassword123',
+          confirmNewPassword: 'OtherPassword123',
+        },
+        'CUSTOMER',
+      ),
+    ).rejects.toThrow(BadRequestException);
+    await expect(
+      service.changePassword(
+        'user-1',
+        {
+          currentPassword: 'CurrentPassword123',
+          newPassword: 'NewPass1',
+          confirmNewPassword: 'NewPass1',
+        },
+        'ADMIN',
+      ),
+    ).rejects.toThrow(BadRequestException);
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
   it('creates administrator accounts with a hashed password and safe response', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
-    prisma.user.create.mockResolvedValue({
-      id: 'admin-1',
-      firstName: 'Morgan',
-      lastName: 'Admin',
-      email: 'morgan@example.com',
-      role: 'ADMIN',
-      passwordHash: 'hashed-admin-password',
-    });
+    let createdPasswordHash = '';
+    prisma.user.create.mockImplementation(
+      (args: { data: Record<string, unknown> }) => {
+        createdPasswordHash = String(args.data.passwordHash);
+        return Promise.resolve({ id: 'admin-1', ...args.data });
+      },
+    );
 
     const result = await service.createAdmin({
       firstName: ' Morgan ',
@@ -132,17 +228,8 @@ describe('UsersService', () => {
       password: 'LongAdminPassword123!',
     });
 
-    expect(prisma.user.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        firstName: 'Morgan',
-        lastName: 'Admin',
-        email: 'morgan@example.com',
-        role: 'ADMIN',
-      }),
-    });
-    expect(prisma.user.create.mock.calls[0][0].data.passwordHash).not.toBe(
-      'LongAdminPassword123!',
-    );
+    expect(prisma.user.create).toHaveBeenCalledTimes(1);
+    expect(createdPasswordHash).not.toBe('LongAdminPassword123!');
     expect(result).toEqual({
       id: 'admin-1',
       firstName: 'Morgan',

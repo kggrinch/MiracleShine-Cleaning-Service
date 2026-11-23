@@ -14,6 +14,7 @@ import { AuthGuard } from '../auth/auth.guard.js';
 import { RequireRoles } from '../auth/roles.decorator.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import {
+  ChangePasswordDto,
   CreateAdminDto,
   UpdateUserDto,
   UsersService,
@@ -49,6 +50,21 @@ export class UsersController {
     }
 
     return this.usersService.updateMe(userId, dto);
+  }
+
+  /** PATCH /api/v1/users/me/password — change the authenticated user's password. */
+  @Patch('me/password')
+  @UseGuards(AuthGuard)
+  async changePassword(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    const user = req.user;
+    if (!user?.id) {
+      throw new UnauthorizedException('Authentication required.');
+    }
+
+    return this.usersService.changePassword(user.id, dto, user.role);
   }
 
   /** GET /api/v1/users/:id — fetch the caller's own profile or any profile as an admin. */

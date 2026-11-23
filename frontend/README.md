@@ -13,12 +13,12 @@ The public site remains accessible without an account. Service cards, quote-form
 | `/admin/login` | Administrators | Shared API sign-in with administrator role verification |
 | `/account` | Customers | Live quote-request overview |
 | `/account/quotes`, `/account/quotes/:id` | Customers | Own requests, details, cancellation, and completed-job reviews |
-| `/account/reviews`, `/account/settings` | Customers | Independent review submission/history and profile updates |
+| `/account/reviews`, `/account/settings` | Customers | Independent review submission/history, profile updates, and password changes |
 | `/admin` | Administrators | Live counts derived from backend lists |
 | `/admin/quotes`, `/admin/quotes/:id` | Administrators | Search, details, and supported quote status transitions |
 | `/admin/services` | Administrators | Service catalog CRUD and availability |
 | `/admin/messages`, `/admin/reviews` | Administrators | Contact inbox and review moderation |
-| `/admin/settings` | Administrators | Authenticated profile updates |
+| `/admin/settings` | Administrators | Authenticated profile and password updates |
 
 Protected routes verify the current user through `GET /auth/me` after refresh and check the returned role before rendering. The API client sends the backend JWT as a bearer token from `sessionStorage`; `401` responses clear it. Authorization and customer ownership remain enforced by the backend.
 
@@ -30,7 +30,7 @@ All requests use the configured `VITE_API_BASE_URL` (defaults to `http://localho
 |---|---|
 | `GET /` (API health check) | Not exposed as a page feature; infrastructure and deployment health monitoring should call it directly |
 | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | Customer registration, both role-specific sign-in pages, session restoration |
-| `GET/PATCH /users/me` | Customer and administrator account settings |
+| `GET/PATCH /users/me`, `PATCH /users/me/password` | Customer and administrator profile settings and authenticated password changes |
 | `GET /users/:id` | Not exposed: self-profile uses `/users/me`; the API only permits arbitrary profile lookup for admins and the UI has no supported customer directory |
 | `POST /users/admin` | Not exposed: administrator provisioning is an administrative setup operation, not a public account workflow |
 | `GET /services`, `GET /services/slug/:slug`, `GET /services/:id` | Public catalog and quote selection use `GET /services`; detail routes are not needed by the current page design |
@@ -41,7 +41,7 @@ All requests use the configured `VITE_API_BASE_URL` (defaults to `http://localho
 | `POST /contact-messages`, `GET /admin/contact-messages`, `GET /contact-messages/:id`, `PATCH /admin/contact-messages/:id/status` | Contact form, admin inbox, status tracking; the admin list already includes the message contents, so its standalone detail endpoint is not needed |
 | `GET /reviews`, `GET /reviews/me`, `POST /reviews`, `GET /admin/reviews`, `PATCH /admin/reviews/:id/status` | Public approved reviews, customer review history/submission, and admin moderation |
 
-The backend has no customer-list/statistics endpoint, password-change endpoint, or email-reply endpoint. The administrator portal therefore does not display a fabricated customer directory; contact replies open a prefilled `mailto:` draft and do not claim to send mail. Password changes are not presented as a working feature. Dashboard totals are calculated from the authenticated backend list responses.
+The backend has no customer-list/statistics endpoint, password-reset flow, or email-reply endpoint. Password changes require an authenticated session and the current password; they do not send email or revoke existing JWTs. The administrator portal therefore does not display a fabricated customer directory; contact replies open a prefilled `mailto:` draft and do not claim to send mail. Dashboard totals are calculated from the authenticated backend list responses.
 
 This template should help get you started developing with Vue 3 in Vite.
 

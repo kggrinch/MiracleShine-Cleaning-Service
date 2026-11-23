@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -60,6 +61,23 @@ export class UpdateUserDto {
   email?: string;
 }
 
+/** Credentials required to change the authenticated user's password. */
+export class ChangePasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  currentPassword!: string;
+
+  @IsString()
+  @MinLength(8)
+  @MaxLength(72)
+  newPassword!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(72)
+  confirmNewPassword!: string;
+}
+
 @Injectable()
 /** Persist user profiles and prevent password hashes from leaving the service. */
 export class UsersService {
@@ -114,6 +132,63 @@ export class UsersService {
       }
       throw error;
     }
+  }
+
+  /** Verify and replace the password for the authenticated account only. */
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+    role: 'CUSTOMER' | 'ADMIN',
+  ) {
+    if (dto.newPassword !== dto.confirmNewPassword) {
+      throw new BadRequestException(
+        'New password confirmation does not match.',
+      );
+    }
+
+    if (role === 'ADMIN' && dto.newPassword.length < 12) {
+      throw new BadRequestException(
+        'Administrator passwords must be at least 12 characters.',
+      );
+    }
+
+    if (Buffer.byteLength(dto.newPassword, 'utf8') > 72) {
+      throw new BadRequestException('New password must be 72 bytes or fewer.');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true, isActive: true },
+    });
+    if (!user || !user.isActive) {
+      throw new NotFoundException('Authenticated user not found.');
+    }
+
+    const currentPasswordMatches = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+    if (!currentPasswordMatches) {
+      throw new BadRequestException('Current password is incorrect.');
+    }
+
+    const newPasswordMatches = await bcrypt.compare(
+      dto.newPassword,
+      user.passwordHash,
+    );
+    if (newPasswordMatches) {
+      throw new BadRequestException(
+        'New password must differ from the current password.',
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    return { message: 'Password changed successfully.' };
   }
 
   /** Return newest-first user records with password hashes removed. */
