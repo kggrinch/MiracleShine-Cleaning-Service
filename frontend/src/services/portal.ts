@@ -19,6 +19,8 @@ export type QuoteRequest = {
   city: string
   state: string
   postalCode: string
+  preferredDate: string | null
+  preferredTime: string | null
   notes: string | null
   status: QuoteStatus
   createdAt: string

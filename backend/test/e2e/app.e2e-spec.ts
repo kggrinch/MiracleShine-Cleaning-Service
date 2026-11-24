@@ -40,6 +40,8 @@ describe('AppController (e2e)', () => {
       },
     ],
   ]);
+  const serviceId = '550e8400-e29b-41d4-a716-446655440000';
+  const quoteRecords: Record<string, unknown>[] = [];
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'e2e-test-jwt-secret-that-is-at-least-32-bytes';
@@ -54,6 +56,33 @@ describe('AppController (e2e)', () => {
     const prismaMock = {
       $connect: jest.fn(),
       $disconnect: jest.fn(),
+      service: {
+        findUnique: jest.fn(({ where }: { where: { id: string } }) =>
+          Promise.resolve(
+            where.id === serviceId
+              ? { id: serviceId, name: 'Residential Cleaning', isActive: true }
+              : null,
+          ),
+        ),
+      },
+      quoteRequest: {
+        create: jest.fn(({ data }: { data: Record<string, unknown> }) => {
+          const quote = {
+            id: `quote-${quoteRecords.length + 1}`,
+            ...data,
+            status: 'PENDING',
+            createdAt: new Date('2026-01-01T12:00:00.000Z'),
+            updatedAt: new Date('2026-01-01T12:00:00.000Z'),
+            service: {
+              id: serviceId,
+              name: 'Residential Cleaning',
+              isActive: true,
+            },
+          };
+          quoteRecords.push(quote);
+          return Promise.resolve(quote);
+        }),
+      },
       user: {
         findUnique: jest.fn(
           (args: { where: { id?: string; email?: string } }) => {
@@ -118,6 +147,101 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer() as Server)
       .get('/api/v1/auth/me')
       .expect(401);
+  });
+
+  it('creates guest and authenticated quotes with only verified account ownership', async () => {
+    const requestBody = {
+      userId: 'admin-1',
+      serviceId,
+      customerFirstName: ' Ava ',
+      customerLastName: ' Smith ',
+      customerEmail: ' AVA@EXAMPLE.COM ',
+      customerPhone: '',
+      propertyType: 'HOUSE',
+      squareFootage: 1200,
+      bedrooms: 3,
+      bathrooms: '1.5',
+      streetAddress: ' 1 Main Street ',
+      city: ' Seattle ',
+      state: ' WA ',
+      postalCode: ' 98101 ',
+      preferredDate: '2026-08-15',
+      preferredTime: '09:30',
+      notes: '  Focus on the kitchen.  ',
+      status: 'SENT',
+    };
+
+    const guestResponse = await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .send(requestBody)
+      .expect(201);
+    expect(guestResponse.body).toMatchObject({
+      userId: null,
+      serviceId,
+      customerFirstName: 'Ava',
+      customerEmail: 'ava@example.com',
+      squareFootage: 1200,
+      bedrooms: 3,
+      bathrooms: '1.5',
+      streetAddress: '1 Main Street',
+      preferredDate: '2026-08-15T00:00:00.000Z',
+      preferredTime: '1970-01-01T09:30:00.000Z',
+      notes: 'Focus on the kitchen.',
+      status: 'PENDING',
+    });
+
+    const customerToken = authService.issueToken('customer-1');
+    const customerResponse = await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send(requestBody)
+      .expect(201);
+    const customerQuote = customerResponse.body as {
+      userId: string | null;
+      status: string;
+    };
+    expect(customerQuote.userId).toBe('customer-1');
+    expect(customerQuote.status).toBe('PENDING');
+
+    expect(quoteRecords).toHaveLength(2);
+    expect(quoteRecords[0].userId).toBeNull();
+    expect(quoteRecords[1].userId).toBe('customer-1');
+    expect(quoteRecords[1]).not.toHaveProperty('status', 'SENT');
+  });
+
+  it('rejects invalid quote fields and unavailable services', async () => {
+    const body = {
+      serviceId,
+      customerFirstName: 'Ava',
+      customerLastName: 'Smith',
+      customerEmail: 'ava@example.com',
+      propertyType: 'HOUSE',
+      streetAddress: '1 Main Street',
+      city: 'Seattle',
+      state: 'WA',
+      postalCode: '98101',
+    };
+
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .send({ ...body, customerEmail: 'invalid' })
+      .expect(400);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .send({ ...body, city: undefined })
+      .expect(400);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .send({ ...body, propertyType: 'WAREHOUSE' })
+      .expect(400);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .send({ ...body, bathrooms: 50.1 })
+      .expect(400);
+    await request(app.getHttpServer() as Server)
+      .post('/api/v1/quote-requests')
+      .send({ ...body, serviceId: '550e8400-e29b-41d4-a716-446655440001' })
+      .expect(400);
   });
 
   it('creates admin accounts only through an authenticated admin', async () => {

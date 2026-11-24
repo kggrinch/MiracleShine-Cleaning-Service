@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowLeft, Mail, Phone } from 'lucide-vue-next'
 import api from '@/services/api'
@@ -67,6 +67,16 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date)
 }
 
+function formatPreferredDate(value: string) {
+  const date = new Date(`${value.slice(0, 10)}T12:00:00`)
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date)
+}
+
+function formatTime(value: string) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'Not provided' : date.toISOString().slice(11, 16)
+}
+
 </script>
 
 <template>
@@ -109,9 +119,11 @@ function formatDate(value: string) {
             <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Email</dt><dd class="mt-1 break-all font-medium text-slate-800">{{ quote.customerEmail }}</dd></div>
             <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Phone</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.customerPhone || 'Not provided' }}</dd></div>
             <div class="sm:col-span-2"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Address</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.streetAddress }}, {{ quote.city }}, {{ quote.state }} {{ quote.postalCode }}</dd></div>
-            <div v-if="quote.squareFootage"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Square footage</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.squareFootage }}</dd></div>
+            <div v-if="quote.squareFootage !== null"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Square footage</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.squareFootage }}</dd></div>
             <div v-if="quote.bedrooms !== null"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Bedrooms</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.bedrooms }}</dd></div>
             <div v-if="quote.bathrooms !== null"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Bathrooms</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.bathrooms }}</dd></div>
+            <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Preferred date</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.preferredDate ? formatPreferredDate(quote.preferredDate) : 'Not provided' }}</dd></div>
+            <div><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Preferred time</dt><dd class="mt-1 font-medium text-slate-800">{{ quote.preferredTime ? formatTime(quote.preferredTime) : 'Not provided' }}</dd></div>
             <div class="sm:col-span-2"><dt class="text-xs font-semibold uppercase tracking-wider text-slate-400">Notes</dt><dd class="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">{{ quote.notes || 'No additional notes.' }}</dd></div>
           </dl>
           <div class="mt-6 flex flex-wrap gap-3 border-t border-slate-100 pt-5">

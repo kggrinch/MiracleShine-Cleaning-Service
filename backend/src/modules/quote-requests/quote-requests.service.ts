@@ -5,8 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PartialType } from '@nestjs/mapped-types';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsDateString,
   IsEmail,
   IsEnum,
   IsNumber,
@@ -14,6 +15,7 @@ import {
   IsString,
   IsInt,
   IsUUID,
+  Matches,
   MaxLength,
   Max,
   Min,
@@ -21,32 +23,34 @@ import {
 } from 'class-validator';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
+function trimString({ value }: { value: unknown }): unknown {
+  return typeof value === 'string' ? value.trim() : value;
+}
+
 /** Validated customer and property details submitted for a cleaning estimate. */
 export class CreateQuoteRequestDto {
-  @IsOptional()
   @IsUUID()
-  @MaxLength(36)
-  serviceId?: string;
+  serviceId!: string;
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  service?: string;
-
+  @Transform(trimString)
   @IsString()
   @MinLength(2)
   @MaxLength(100)
   customerFirstName!: string;
 
+  @Transform(trimString)
   @IsString()
   @MinLength(2)
   @MaxLength(100)
   customerLastName!: string;
 
+  @Transform(trimString)
   @IsEmail()
+  @MaxLength(255)
   customerEmail!: string;
 
   @IsOptional()
+  @Transform(trimString)
   @IsString()
   @MaxLength(30)
   customerPhone?: string;
@@ -58,42 +62,57 @@ export class CreateQuoteRequestDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(2147483647)
   squareFootage?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(2147483647)
   bedrooms?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 1 })
   @Min(0)
-  @Max(99)
+  @Max(50)
   bathrooms?: number;
 
+  @Transform(trimString)
   @IsString()
   @MinLength(3)
   @MaxLength(255)
   streetAddress!: string;
 
+  @Transform(trimString)
   @IsString()
   @MinLength(2)
   @MaxLength(100)
   city!: string;
 
+  @Transform(trimString)
   @IsString()
   @MinLength(2)
   @MaxLength(100)
   state!: string;
 
+  @Transform(trimString)
   @IsString()
   @MinLength(3)
   @MaxLength(20)
   postalCode!: string;
 
   @IsOptional()
+  @IsDateString({ strict: true })
+  preferredDate?: string;
+
+  @IsOptional()
+  @Matches(/^(?:[01]\d|2[0-3]):[0-5]\d$/)
+  preferredTime?: string;
+
+  @IsOptional()
+  @Transform(trimString)
   @IsString()
   @MaxLength(5000)
   notes?: string;
@@ -140,7 +159,13 @@ export class QuoteRequestsService {
 
   /** Resolve an active service and persist a normalized guest or account quote. */
   async create(dto: CreateQuoteRequestDto, userId?: string) {
-    const service = await this.resolveService(dto);
+    const service = await this.prisma.service.findUnique({
+      where: { id: dto.serviceId },
+    });
+    if (!service || !service.isActive) {
+      throw new BadRequestException('The selected service is unavailable.');
+    }
+
     return this.prisma.quoteRequest.create({
       data: {
         userId: userId ?? null,
@@ -157,8 +182,13 @@ export class QuoteRequestsService {
         city: dto.city.trim(),
         state: dto.state.trim(),
         postalCode: dto.postalCode.trim(),
+        preferredDate: dto.preferredDate
+          ? new Date(`${dto.preferredDate}T00:00:00.000Z`)
+          : null,
+        preferredTime: dto.preferredTime
+          ? new Date(`1970-01-01T${dto.preferredTime}:00.000Z`)
+          : null,
         notes: dto.notes?.trim() || null,
-        status: 'PENDING',
       },
       include: { service: true },
     });
@@ -293,38 +323,5 @@ export class QuoteRequestsService {
         },
       },
     });
-  }
-
-  /** Resolve either an active service ID or an active service name from the request. */
-  private async resolveService(dto: CreateQuoteRequestDto) {
-    if (dto.serviceId) {
-      const service = await this.prisma.service.findUnique({
-        where: { id: dto.serviceId },
-      });
-      if (!service || !service.isActive) {
-        throw new BadRequestException('The selected service is unavailable.');
-      }
-      return service;
-    }
-
-    if (dto.service) {
-      const service = await this.prisma.service.findFirst({
-        where: {
-          name: {
-            equals: dto.service.trim(),
-            mode: 'insensitive',
-          },
-          isActive: true,
-        },
-      });
-
-      if (!service) {
-        throw new BadRequestException('The selected service is unavailable.');
-      }
-
-      return service;
-    }
-
-    throw new BadRequestException('A valid service is required.');
   }
 }

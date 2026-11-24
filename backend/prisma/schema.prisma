@@ -139,6 +139,9 @@ model QuoteRequest {
   state         String @db.VarChar(100)
   postalCode    String @map("postal_code") @db.VarChar(20)
 
+  preferredDate DateTime? @map("preferred_date") @db.Date
+  preferredTime DateTime? @map("preferred_time") @db.Time(6)
+
   notes String? @db.Text
 
   status    QuoteStatus @default(PENDING)

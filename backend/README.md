@@ -27,7 +27,14 @@ Quote requests use the existing statuses:
 
 `PENDING` -> `SENT` -> `REJECTED`
 
-Scheduling and walk-through arrangements are intentionally handled outside the application. The application stores quote requests and statuses only.
+Quote submissions may include an optional preferred date and time. These are
+customer preferences for follow-up only; they do not create an appointment,
+reserve a calendar slot, or confirm cleaning.
+
+Guests may submit without an account. When a valid bearer token is supplied,
+the request is associated with the account resolved by the optional auth guard;
+client-supplied ownership and status fields are ignored. Service IDs must refer
+to an active catalog service.
 
 ## Reviews
 

@@ -38,10 +38,12 @@ All requests use the configured `VITE_API_BASE_URL` (defaults to `http://localho
 | `POST /admin/services/reset-defaults` | Not exposed: this operation resets catalog data and is not required for normal catalog management |
 | `POST /quote-requests`, `GET /quote-requests/me`, `GET /quote-requests/:id`, `POST /quote-requests/:id/cancel` | Guest/account quote form, customer dashboard and details, cancellation |
 | `GET /admin/quote-requests`, `GET /admin/quote-requests/:id`, `PATCH /admin/quote-requests/:id/status` | Admin filters, details, dashboard metrics, and lifecycle updates |
-| `POST /contact-messages`, `GET /admin/contact-messages`, `GET /contact-messages/:id`, `PATCH /admin/contact-messages/:id/status` | Contact form, admin inbox, status tracking; the admin list already includes the message contents, so its standalone detail endpoint is not needed |
+| `POST /contact-messages`, `GET /admin/contact-messages`, `GET /contact-messages/:id`, `PATCH /contact-messages/:id/status` | Contact form, admin inbox, status tracking; the admin list already includes the message contents, so its standalone detail endpoint is not needed |
 | `GET /reviews`, `GET /reviews/me`, `POST /reviews`, `GET /admin/reviews`, `PATCH /admin/reviews/:id/status` | Public approved reviews, customer review history/submission, and admin moderation |
 
 The backend has no customer-list/statistics endpoint, password-reset flow, or email-reply endpoint. Password changes require an authenticated session and the current password; they do not send email or revoke existing JWTs. The administrator portal therefore does not display a fabricated customer directory; contact replies open a prefilled `mailto:` draft and do not claim to send mail. Dashboard totals are calculated from the authenticated backend list responses.
+
+The quote form loads active services from the catalog, preselects a service when launched from a service page, and pre-fills editable contact details for signed-in users. Preferred dates and times are optional customer preferences for discussion, not confirmed appointments. Guest submissions remain unassociated with an account.
 
 This template should help get you started developing with Vue 3 in Vite.
 

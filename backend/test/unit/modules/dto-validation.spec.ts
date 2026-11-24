@@ -14,6 +14,7 @@ describe('request DTO validation', () => {
       customerFirstName: 'Ava',
       customerLastName: 'Smith',
       customerEmail: 'not-an-email',
+      serviceId: '550e8400-e29b-41d4-a716-446655440000',
       propertyType: 'HOUSE',
       streetAddress: '',
       city: 'Seattle',
@@ -25,6 +26,39 @@ describe('request DTO validation', () => {
 
     expect(errors.map((error) => error.property)).toEqual(
       expect.arrayContaining(['customerEmail', 'streetAddress']),
+    );
+  });
+
+  it('rejects invalid quote service IDs, property types, measurements, and preferred times', async () => {
+    const dto = plainToInstance(CreateQuoteRequestDto, {
+      serviceId: 'not-a-uuid',
+      customerFirstName: 'Ava',
+      customerLastName: 'Smith',
+      customerEmail: 'ava@example.com',
+      propertyType: 'WAREHOUSE',
+      streetAddress: '1 Main Street',
+      city: 'Seattle',
+      state: 'WA',
+      postalCode: '98101',
+      squareFootage: -1,
+      bedrooms: 1.5,
+      bathrooms: 50.1,
+      preferredDate: '2026-02-30',
+      preferredTime: '25:00',
+    });
+
+    const errors = await validate(dto);
+
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining([
+        'serviceId',
+        'propertyType',
+        'squareFootage',
+        'bedrooms',
+        'bathrooms',
+        'preferredDate',
+        'preferredTime',
+      ]),
     );
   });
 

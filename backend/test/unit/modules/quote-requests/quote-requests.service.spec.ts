@@ -74,8 +74,46 @@ describe('QuoteRequestsService', () => {
         city: 'Seattle',
         state: 'WA',
         postalCode: '98101',
+        preferredDate: null,
+        preferredTime: null,
         notes: null,
-        status: 'PENDING',
+      },
+      include: { service: true },
+    });
+  });
+
+  it('stores optional preferred date and time as UTC date-only/time values', async () => {
+    prisma.service.findUnique.mockResolvedValue({
+      id: 'service-1',
+      isActive: true,
+    });
+    prisma.quoteRequest.create.mockResolvedValue({ id: 'quote-1' });
+
+    await service.create({
+      ...quoteDto,
+      preferredDate: '2026-03-15',
+      preferredTime: '09:30',
+    });
+
+    expect(prisma.quoteRequest.create).toHaveBeenCalledWith({
+      data: {
+        userId: null,
+        serviceId: 'service-1',
+        customerFirstName: 'Ava',
+        customerLastName: 'Smith',
+        customerEmail: 'ava@example.com',
+        customerPhone: null,
+        propertyType: 'HOUSE',
+        squareFootage: null,
+        bedrooms: null,
+        bathrooms: null,
+        streetAddress: '1 Main St',
+        city: 'Seattle',
+        state: 'WA',
+        postalCode: '98101',
+        preferredDate: new Date('2026-03-15T00:00:00.000Z'),
+        preferredTime: new Date('1970-01-01T09:30:00.000Z'),
+        notes: null,
       },
       include: { service: true },
     });
@@ -93,7 +131,7 @@ describe('QuoteRequestsService', () => {
 
   it('rejects a quote without a service reference', async () => {
     await expect(
-      service.create({ ...quoteDto, serviceId: undefined }),
+      service.create({ ...quoteDto, serviceId: '' }),
     ).rejects.toThrow(BadRequestException);
   });
 
